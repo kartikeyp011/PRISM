@@ -1,12 +1,13 @@
-"""API route handlers — stub implementations for Phase 1."""
+"""API route handlers."""
 
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Response
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agents.ingestion import ingestion_agent
 from app.config import settings
 from app.contract import (
     PATH_ALERTS_ACK,
@@ -21,6 +22,7 @@ from app.contract import (
     REDIS_TOPIC_RISK,
     WS_EVENTS,
 )
+from app.db.session import get_session
 from app.models.schemas import (
     AlertAckRequest,
     AlertAckResponse,
@@ -32,6 +34,7 @@ from app.models.schemas import (
     RagQueryResponse,
     RagSource,
     RiskActiveResponse,
+    SensorReading,
     SensorsLatestResponse,
     validate_event_type,
 )
@@ -40,13 +43,12 @@ from app.services.llm_client import ChatMessage, llm_client
 router = APIRouter()
 CONTRACT_VERSION = "1.0.0"
 
-# Contract-aligned pub/sub and WebSocket event names (used by Features 2+)
 PUBSUB_TOPICS = {
     "ingest": REDIS_TOPIC_EVENTS_INGEST,
     "alerts": REDIS_TOPIC_ALERTS,
     "risk": REDIS_TOPIC_RISK,
 }
-WS_EVENT_NAMES = WS_EVENTS  # alert.created, alert.updated, risk.changed
+WS_EVENT_NAMES = WS_EVENTS
 
 
 @router.get(PATH_HEALTH, response_model=HealthResponse)
@@ -58,21 +60,57 @@ async def health() -> HealthResponse:
     )
 
 
-@router.post(PATH_INGEST_EVENTS, response_model=IngestEventsResponse, status_code=202)
-async def ingest_events(body: IngestEventsRequest) -> IngestEventsResponse:
+@router.post(PATH_INGEST_EVENTS, response_model=IngestEventsResponse)
+async def ingest_events(
+    body: IngestEventsRequest,
+    response: Response,
+    session: AsyncSession = Depends(get_session),
+) -> IngestEventsResponse:
     for event in body.events:
         if not validate_event_type(event.event_type):
             raise HTTPException(
                 status_code=400,
                 detail=f"Invalid event_type: {event.event_type}",
             )
-    event_ids = [e.event_id for e in body.events]
-    return IngestEventsResponse(accepted=len(event_ids), event_ids=event_ids)
+
+    try:
+        result = await ingestion_agent.process_batch(session, body.events)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"Database unavailable: {exc}") from exc
+
+    if result.accepted == 0 and result.skipped > 0:
+        response.status_code = 200
+    else:
+        response.status_code = 202
+
+    return IngestEventsResponse(
+        accepted=result.accepted,
+        skipped=result.skipped,
+        event_ids=result.event_ids,
+        status=result.status,
+    )
 
 
 @router.get(PATH_SENSORS_LATEST, response_model=SensorsLatestResponse)
-async def sensors_latest(zone_id: str | None = None, limit: int = 50) -> SensorsLatestResponse:
-    return SensorsLatestResponse(readings=[], count=0, last_event_at=None)
+async def sensors_latest(
+    zone_id: str | None = None,
+    limit: int = 50,
+    session: AsyncSession = Depends(get_session),
+) -> SensorsLatestResponse:
+    try:
+        rows, count, last_event_at, events_ingested = await ingestion_agent.latest_sensors(
+            session, zone_id=zone_id, limit=limit
+        )
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"Database unavailable: {exc}") from exc
+
+    readings = [SensorReading(**row) for row in rows]
+    return SensorsLatestResponse(
+        readings=readings,
+        count=count,
+        events_ingested=events_ingested,
+        last_event_at=last_event_at,
+    )
 
 
 @router.get(PATH_RISK_ACTIVE, response_model=RiskActiveResponse)

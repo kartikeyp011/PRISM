@@ -1,6 +1,6 @@
 # User Flow — Feature 1: Simulator + Ingestion
 
-**Status:** Planned (Phase 2)
+**Status:** Complete (Phase 2)
 
 ---
 
@@ -118,9 +118,9 @@ flowchart TD
 
 Before moving to Feature 2:
 
-- [ ] Unit: schema validation rejects malformed payloads
-- [ ] Integration: ingest batch → rows appear in DB
-- [ ] E2E: simulator container → API → dashboard shows updated count
+- [x] Unit: schema validation rejects malformed payloads
+- [x] Integration: ingest batch → rows appear in DB (requires `INTEGRATION_TESTS=1`)
+- [x] E2E: simulator replays scenario → dashboard polls ingestion status
 
 ---
 

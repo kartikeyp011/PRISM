@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchHealth, type HealthResponse } from "./api/client";
+import IngestionStatusPanel from "./components/IngestionStatusPanel";
 
 export default function App() {
   const [health, setHealth] = useState<HealthResponse | null>(null);
@@ -17,18 +18,21 @@ export default function App() {
         <h1>PRISM</h1>
         <p>Predictive Risk &amp; Incident Safety Management System</p>
       </header>
-      <section className="status-card">
-        <h2>System Status</h2>
-        {error && <p className="error">API unreachable: {error}</p>}
-        {health && (
-          <ul>
-            <li>Status: {health.status}</li>
-            <li>Version: {health.version}</li>
-            <li>LLM mode: {health.llm_mode}</li>
-          </ul>
-        )}
-        {!health && !error && <p>Connecting to backend…</p>}
-      </section>
+      <div className="dashboard-grid">
+        <section className="status-card">
+          <h2>System Status</h2>
+          {error && <p className="error">API unreachable: {error}</p>}
+          {health && (
+            <ul>
+              <li>Status: {health.status}</li>
+              <li>Version: {health.version}</li>
+              <li>LLM mode: {health.llm_mode}</li>
+            </ul>
+          )}
+          {!health && !error && <p>Connecting to backend…</p>}
+        </section>
+        <IngestionStatusPanel />
+      </div>
     </main>
   );
 }

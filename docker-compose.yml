@@ -86,6 +86,10 @@ services:
       - .env
     environment:
       PRISM_API_URL: http://backend:8000
+      SCENARIO: compound_risk_demo
+      SCENARIOS_DIR: /app/scenarios
+    volumes:
+      - ./simulator/scenarios:/app/scenarios:ro
     depends_on:
       backend:
         condition: service_healthy

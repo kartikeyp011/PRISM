@@ -108,8 +108,9 @@ endpoints:
           payload: object
     response:
       accepted: integer
+      skipped: integer
       event_ids: array
-      status: string  # accepted
+      status: string  # accepted | duplicate
 
   sensors_latest:
     method: GET
@@ -120,6 +121,7 @@ endpoints:
     response:
       readings: array
       count: integer
+      events_ingested: integer
       last_event_at: string  # nullable ISO 8601
 
   risk_active:

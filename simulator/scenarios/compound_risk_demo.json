@@ -1,5 +1,129 @@
 {
   "name": "compound_risk_demo",
-  "description": "Stages gas spike, hot-work permit, and worker entry for compound risk demo",
-  "events": []
+  "description": "Stages LEL gas spike, hot-work permit, and worker entry in confined zone A",
+  "zone_id": "22222222-2222-2222-2222-222222222222",
+  "batches": [
+    {
+      "delay_seconds": 0,
+      "events": [
+        {
+          "event_id": "demo-lel-001",
+          "event_type": "sensor_reading",
+          "timestamp": "2026-07-02T10:00:00Z",
+          "zone_id": "22222222-2222-2222-2222-222222222222",
+          "payload": {
+            "sensor_id": "33333333-3333-3333-3333-333333333333",
+            "sensor_type": "LEL",
+            "value": 5.0,
+            "unit": "%",
+            "quality": "good"
+          }
+        },
+        {
+          "event_id": "demo-o2-001",
+          "event_type": "sensor_reading",
+          "timestamp": "2026-07-02T10:00:00Z",
+          "zone_id": "22222222-2222-2222-2222-222222222222",
+          "payload": {
+            "sensor_id": "44444444-4444-4444-4444-444444444444",
+            "sensor_type": "O2",
+            "value": 20.8,
+            "unit": "%",
+            "quality": "good"
+          }
+        }
+      ]
+    },
+    {
+      "delay_seconds": 2,
+      "events": [
+        {
+          "event_id": "demo-lel-002",
+          "event_type": "sensor_reading",
+          "timestamp": "2026-07-02T10:00:30Z",
+          "zone_id": "22222222-2222-2222-2222-222222222222",
+          "payload": {
+            "sensor_id": "33333333-3333-3333-3333-333333333333",
+            "sensor_type": "LEL",
+            "value": 18.0,
+            "unit": "%",
+            "quality": "good"
+          }
+        },
+        {
+          "event_id": "demo-permit-001",
+          "event_type": "permit_update",
+          "timestamp": "2026-07-02T10:00:30Z",
+          "zone_id": "22222222-2222-2222-2222-222222222222",
+          "payload": {
+            "permit_id": "permit-hot-work-001",
+            "permit_type": "hot_work",
+            "status": "active",
+            "start_time": "2026-07-02T09:30:00Z",
+            "end_time": "2026-07-02T14:00:00Z"
+          }
+        }
+      ]
+    },
+    {
+      "delay_seconds": 2,
+      "events": [
+        {
+          "event_id": "demo-lel-003",
+          "event_type": "sensor_reading",
+          "timestamp": "2026-07-02T10:01:00Z",
+          "zone_id": "22222222-2222-2222-2222-222222222222",
+          "payload": {
+            "sensor_id": "33333333-3333-3333-3333-333333333333",
+            "sensor_type": "LEL",
+            "value": 42.0,
+            "unit": "%",
+            "quality": "good"
+          }
+        },
+        {
+          "event_id": "demo-worker-001",
+          "event_type": "worker_location",
+          "timestamp": "2026-07-02T10:01:00Z",
+          "zone_id": "22222222-2222-2222-2222-222222222222",
+          "payload": {
+            "worker_id": "worker-042",
+            "latitude": 37.7745,
+            "longitude": -122.4175
+          }
+        }
+      ]
+    },
+    {
+      "delay_seconds": 2,
+      "events": [
+        {
+          "event_id": "demo-lel-004",
+          "event_type": "sensor_reading",
+          "timestamp": "2026-07-02T10:01:30Z",
+          "zone_id": "22222222-2222-2222-2222-222222222222",
+          "payload": {
+            "sensor_id": "33333333-3333-3333-3333-333333333333",
+            "sensor_type": "LEL",
+            "value": 58.0,
+            "unit": "%",
+            "quality": "good"
+          }
+        },
+        {
+          "event_id": "demo-o2-002",
+          "event_type": "sensor_reading",
+          "timestamp": "2026-07-02T10:01:30Z",
+          "zone_id": "22222222-2222-2222-2222-222222222222",
+          "payload": {
+            "sensor_id": "44444444-4444-4444-4444-444444444444",
+            "sensor_type": "O2",
+            "value": 19.2,
+            "unit": "%",
+            "quality": "warning"
+          }
+        }
+      ]
+    }
+  ]
 }

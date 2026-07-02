@@ -21,8 +21,37 @@ export interface HealthResponse {
   llm_mode: string;
 }
 
+export interface SensorReading {
+  sensor_id: string;
+  zone_id: string;
+  sensor_type: string;
+  value: number;
+  unit: string;
+  timestamp: string;
+}
+
+export interface SensorsLatestResponse {
+  readings: SensorReading[];
+  count: number;
+  events_ingested: number;
+  last_event_at: string | null;
+}
+
+export const SCENARIOS = [
+  { id: "compound_risk_demo", label: "Compound Risk Demo" },
+] as const;
+
 export async function fetchHealth(): Promise<HealthResponse> {
   const res = await fetch(`${API_BASE}${API_PATHS.health}`);
   if (!res.ok) throw new Error(`Health check failed: ${res.status}`);
+  return res.json();
+}
+
+export async function fetchSensorsLatest(
+  zoneId?: string
+): Promise<SensorsLatestResponse> {
+  const params = zoneId ? `?zone_id=${encodeURIComponent(zoneId)}` : "";
+  const res = await fetch(`${API_BASE}${API_PATHS.sensorsLatest}${params}`);
+  if (!res.ok) throw new Error(`Sensors latest failed: ${res.status}`);
   return res.json();
 }

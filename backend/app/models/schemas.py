@@ -29,6 +29,7 @@ class IngestEventsRequest(BaseModel):
 
 class IngestEventsResponse(BaseModel):
     accepted: int
+    skipped: int = 0
     event_ids: list[str]
     status: str = "accepted"
 
@@ -45,6 +46,7 @@ class SensorReading(BaseModel):
 class SensorsLatestResponse(BaseModel):
     readings: list[SensorReading]
     count: int
+    events_ingested: int = 0
     last_event_at: str | None = None
 
 
