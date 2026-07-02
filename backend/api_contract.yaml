@@ -1,0 +1,172 @@
+# PRISM API Contract — Single Source of Truth
+# All backend routes, frontend clients, and tests must align with this file.
+
+version: "1.0.0"
+
+config_keys:
+  LLM_BASE_URL:
+    description: Remote Ollama base URL via ngrok (empty = mock mode)
+    required: false
+    default: ""
+  LLM_MODEL:
+    description: Model name for chat completions
+    required: false
+    default: "llama3.2"
+  DATABASE_URL:
+    description: Async SQLAlchemy database URL
+    required: true
+    example: "postgresql+asyncpg://prism:prism@postgres:5432/prism"
+  REDIS_URL:
+    description: Redis connection URL
+    required: true
+    example: "redis://redis:6379/0"
+  CHROMA_URL:
+    description: ChromaDB HTTP endpoint
+    required: true
+    example: "http://chroma:8000"
+  NGROK_AUTH_TOKEN:
+    description: ngrok auth token (Kaggle notebook only, not used locally)
+    required: false
+    kaggle_only: true
+
+constants:
+  risk_levels:
+    - LOW
+    - MEDIUM
+    - HIGH
+    - CRITICAL
+
+  alert_statuses:
+    - ACTIVE
+    - ACKNOWLEDGED
+    - RESOLVED
+
+  event_types:
+    - sensor_reading
+    - permit_update
+    - worker_location
+
+  permit_types:
+    - hot_work
+    - confined_space
+    - general
+
+  permit_statuses:
+    - active
+    - expired
+    - cancelled
+
+  compound_rules:
+    - id: HotWorkGasSpike
+      description: Active hot-work permit + LEL above threshold in same zone
+      default_severity: HIGH
+    - id: ConfinedSpaceOccupancy
+      description: Confined-space permit + worker present + O2 below threshold
+      default_severity: CRITICAL
+    - id: PermitZoneMismatch
+      description: Worker location outside permitted zone polygon
+      default_severity: MEDIUM
+
+  risk_colors:
+    LOW: "#22c55e"
+    MEDIUM: "#eab308"
+    HIGH: "#f97316"
+    CRITICAL: "#ef4444"
+
+redis_topics:
+  events_ingest: prism.events.ingest
+  alerts: prism.alerts
+  risk: prism.risk
+
+websocket:
+  path: /ws/alerts
+  events:
+    - alert.created
+    - alert.updated
+    - risk.changed
+
+endpoints:
+  health:
+    method: GET
+    path: /api/v1/health
+    response:
+      status: string
+      version: string
+      llm_mode: string  # live | mock
+
+  ingest_events:
+    method: POST
+    path: /api/v1/ingest/events
+    request:
+      events:
+        type: array
+        items:
+          event_id: string
+          event_type: string  # sensor_reading | permit_update | worker_location
+          timestamp: string   # ISO 8601
+          zone_id: string
+          payload: object
+    response:
+      accepted: integer
+      event_ids: array
+      status: string  # accepted
+
+  sensors_latest:
+    method: GET
+    path: /api/v1/sensors/latest
+    query:
+      zone_id: string  # optional
+      limit: integer   # optional, default 50
+    response:
+      readings: array
+      count: integer
+      last_event_at: string  # nullable ISO 8601
+
+  risk_active:
+    method: GET
+    path: /api/v1/risk/active
+    query:
+      zone_id: string  # optional
+    response:
+      assessments: array
+      count: integer
+
+  alerts_ack:
+    method: POST
+    path: /api/v1/alerts/ack
+    request:
+      alert_id: string
+      acknowledged_by: string  # optional
+    response:
+      alert_id: string
+      status: string  # ACKNOWLEDGED
+
+  map_layers:
+    method: GET
+    path: /api/v1/map/layers
+    response:
+      type: FeatureCollection
+      layers:
+        zones: object
+        sensors: object
+        workers: object
+        permits: object
+
+  rag_query:
+    method: POST
+    path: /api/v1/rag/query
+    request:
+      query: string
+      session_id: string  # optional
+      top_k: integer        # optional, default 5
+    response:
+      answer: string
+      sources:
+        type: array
+        items:
+          document_id: string
+          title: string
+          excerpt: string
+          score: float
+      session_id: string
+      llm_mode: string  # live | mock

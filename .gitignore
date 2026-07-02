@@ -1,1 +1,13 @@
 CURSOR_INSTRUCTIONS.md
+.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+node_modules/
+dist/
+*.egg-info/
+postgres_data/
+chroma_data/
+.DS_Store
