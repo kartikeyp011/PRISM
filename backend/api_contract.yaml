@@ -187,3 +187,5 @@ endpoints:
           score: float
       session_id: string
       llm_mode: string  # live | mock
+      related_alerts: array
+      related_incidents: array

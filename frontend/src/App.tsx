@@ -3,6 +3,7 @@ import type { PageId } from "./constants/riskColors";
 import AlertPanel from "./components/AlertPanel";
 import NavBar from "./components/NavBar";
 import DashboardPage from "./pages/DashboardPage";
+import IncidentsPage from "./pages/IncidentsPage";
 import SafetyMapPage from "./pages/SafetyMapPage";
 
 export default function App() {
@@ -22,6 +23,7 @@ export default function App() {
 
       {page === "dashboard" && <DashboardPage />}
       {page === "map" && <SafetyMapPage />}
+      {page === "incidents" && <IncidentsPage />}
     </main>
   );
 }

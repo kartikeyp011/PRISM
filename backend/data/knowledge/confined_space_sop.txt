@@ -1,0 +1,26 @@
+Confined Space Entry Standard Operating Procedure (SOP)
+
+Document ID: sop-confined-space-001
+
+1. Scope
+This SOP governs entry into permit-required confined spaces including tanks, vessels, and enclosed process areas.
+
+2. Atmospheric requirements
+- Minimum acceptable oxygen level: 19.5%
+- Maximum oxygen level: 23.5%
+- Continuous atmospheric monitoring is mandatory during occupancy
+- Entry supervisor must verify readings before each shift entry
+
+3. Permit requirements
+- Confined space entry permit must be active before any worker enters
+- At least one attendant must remain outside the confined space at all times
+- Rescue equipment must be staged at the entry point before work begins
+
+4. Worker restrictions
+No worker may enter a confined space when:
+- Oxygen is below 19.5% or above 23.5%
+- Toxic gas levels exceed permissible exposure limits
+- The entry permit has expired or been cancelled
+
+5. Stop work authority
+Any worker or attendant may stop work if atmospheric conditions deteriorate or permit conditions are violated.

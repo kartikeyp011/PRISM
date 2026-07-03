@@ -113,6 +113,8 @@ class RagQueryResponse(BaseModel):
     sources: list[RagSource]
     session_id: str
     llm_mode: str
+    related_alerts: list[dict[str, Any]] = Field(default_factory=list)
+    related_incidents: list[dict[str, Any]] = Field(default_factory=list)
 
 
 def validate_event_type(value: str) -> bool:

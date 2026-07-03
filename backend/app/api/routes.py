@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-import uuid
-
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.alerts import alert_agent
+from app.agents.compliance import compliance_agent
 from app.agents.ingestion import ingestion_agent
 from app.agents.risk import risk_agent
 from app.config import settings
@@ -197,26 +196,33 @@ async def map_layers(session: AsyncSession = Depends(get_session)) -> MapLayersR
 
 
 @router.post(PATH_RAG_QUERY, response_model=RagQueryResponse)
-async def rag_query(body: RagQueryRequest) -> RagQueryResponse:
-    from app.services.llm_client import ChatMessage, llm_client
-    session_id = body.session_id or str(uuid.uuid4())
-    result = await llm_client.chat(
-        [
-            ChatMessage(role="system", content="You are a safety compliance assistant."),
-            ChatMessage(role="user", content=body.query),
-        ]
-    )
-    sources = [
-        RagSource(
-            document_id="mock-sop-hot-work",
-            title="Hot Work Permit SOP",
-            excerpt="Gas monitoring and fire watch required before hot work.",
-            score=0.92,
+async def rag_query(
+    body: RagQueryRequest,
+    session: AsyncSession = Depends(get_session),
+) -> RagQueryResponse:
+    try:
+        result = await compliance_agent.ask(
+            session,
+            body.query,
+            session_id=body.session_id,
+            top_k=body.top_k,
         )
-    ] if llm_client.is_mock else []
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"RAG service unavailable: {exc}") from exc
+
     return RagQueryResponse(
-        answer=result.content,
-        sources=sources,
-        session_id=session_id,
-        llm_mode=result.mode,
+        answer=result.answer,
+        sources=[
+            RagSource(
+                document_id=s.document_id,
+                title=s.title,
+                excerpt=s.excerpt,
+                score=s.score,
+            )
+            for s in result.sources
+        ],
+        session_id=result.session_id,
+        llm_mode=result.llm_mode,
+        related_alerts=result.related_alerts,
+        related_incidents=result.related_incidents,
     )

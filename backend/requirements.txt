@@ -10,3 +10,5 @@ sqlalchemy[asyncio]>=2.0.36
 asyncpg>=0.30.0
 geoalchemy2>=0.15.0
 redis>=5.0.0
+chromadb>=0.5.0
+sentence-transformers>=3.0.0

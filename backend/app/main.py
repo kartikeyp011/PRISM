@@ -1,5 +1,6 @@
 """PRISM FastAPI application entry point."""
 
+import asyncio
 from contextlib import asynccontextmanager
 import logging
 
@@ -17,6 +18,14 @@ from app.services.redis_client import close_redis
 logger = logging.getLogger(__name__)
 
 
+def _background_index() -> None:
+    from app.rag.index import ensure_indexed
+
+    count = ensure_indexed()
+    if count:
+        logger.info("RAG knowledge index ready (%d chunks)", count)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
@@ -28,6 +37,7 @@ async def lifespan(app: FastAPI):
         await start_ingest_subscriber()
     except Exception:
         logger.exception("Redis ingest subscriber failed to start")
+    asyncio.create_task(asyncio.to_thread(_background_index))
     yield
     await stop_ingest_subscriber()
     await close_redis()

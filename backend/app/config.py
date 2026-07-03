@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://prism:prism@postgres:5432/prism"
     REDIS_URL: str = "redis://redis:6379/0"
     CHROMA_URL: str = "http://chroma:8000"
+    EMBEDDING_MODEL: str = "all-MiniLM-L6-v2"
 
     @property
     def llm_mode(self) -> str:

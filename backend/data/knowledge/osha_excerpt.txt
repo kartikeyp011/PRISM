@@ -1,0 +1,15 @@
+OSHA General Industry Safety Excerpts (Summary)
+
+Document ID: osha-general-001
+
+Hot Work (29 CFR 1910.252)
+Employers must implement controls to prevent fire and explosion during welding and cutting operations. Combustible materials must be relocated or protected. Fire watches are required where other than a minor fire might develop.
+
+Confined Spaces (29 CFR 1910.146)
+Permit-required confined spaces must have a written program including atmospheric testing, attendant monitoring, and rescue procedures. Oxygen-deficient atmospheres (below 19.5%) are immediately dangerous to life and health.
+
+Hazard Communication
+Employers must ensure workers are informed of chemical hazards in their work areas and trained on protective measures before exposure.
+
+Recordkeeping
+Employers must maintain logs of work-related injuries and illnesses and investigate incidents to identify root causes and corrective actions.

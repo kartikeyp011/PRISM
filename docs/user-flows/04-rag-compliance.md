@@ -1,6 +1,6 @@
 # User Flow — Feature 4: RAG Incident & Compliance Intelligence
 
-**Status:** Planned (Phase 5)
+**Status:** Complete (Phase 5)
 
 ---
 
@@ -176,9 +176,9 @@ Seeded knowledge docs should return cited answers for these in both live and moc
 
 Before moving to optional CV or finalize:
 
-- [ ] Unit: retriever returns expected chunk for known query
-- [ ] Unit: LLM client mock mode returns canned answer
-- [ ] Integration: full query path with mock LLM
+- [x] Unit: retriever returns expected chunk for known query
+- [x] Unit: LLM client mock mode returns cited answer via RAG service
+- [x] Integration: full query path (requires `INTEGRATION_TESTS=1`)
 - [ ] Manual: live ngrok path returns cited answer for seeded SOP question
 
 ---

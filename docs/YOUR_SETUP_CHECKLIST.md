@@ -52,18 +52,18 @@ You already have a `.env` — **you are done with this step.**
 
 | Variable | Change it? | Where the value comes from |
 |---|---|---|
-| `LLM_BASE_URL` | **Leave empty** | Only needed later for RAG (Feature 4). Empty = mock LLM mode (works fine now). |
-| `LLM_MODEL` | No | Default `llama3.2` — only matters when you add Kaggle later |
+| `LLM_BASE_URL` | **Leave empty** | Empty = mock LLM mode (works for RAG demo). Set ngrok URL for live answers. |
+| `LLM_MODEL` | No | Default `llama3.2` — only matters when you add Kaggle |
 | `DATABASE_URL` | No | Pre-set for Docker internal network (`postgres` hostname) |
 | `REDIS_URL` | No | Pre-set for Docker (`redis` hostname) |
-| `CHROMA_URL` | No | Pre-set for Docker (`chroma` hostname) — unused until RAG |
+| `CHROMA_URL` | No | Pre-set for Docker (`chroma` hostname) — RAG indexes on backend startup |
 | `POSTGRES_USER` / `PASSWORD` / `DB` | No | Demo defaults (`prism` / `prism` / `prism`) — Docker Compose creates this automatically |
 
 These are **not secrets you fetch from a website** — they are wiring between containers on the same Docker network. The repo ships working defaults.
 
-### The only value you will ever add manually (later)
+### Optional — Live LLM via Kaggle
 
-When Feature 4 (RAG) is built and you want a **live** LLM instead of mock answers:
+If you want **live** LLM answers instead of mock mode in the Incidents chat:
 
 1. Run the Kaggle notebook (see [`kaggle/README.md`](../kaggle/README.md))
 2. Copy the printed ngrok URL into `LLM_BASE_URL`
@@ -145,6 +145,25 @@ curl http://localhost:8000/api/v1/risk/active
 
 ---
 
+## 4b. Try Incident Intelligence (Feature 4)
+
+With the stack running:
+
+- [ ] Open http://localhost:5173 and click **Incidents** in the nav
+- [ ] Ask: "What are the hot work permit requirements?"
+- [ ] Confirm the answer includes **sources** (SOP citations) and related context
+- [ ] Try: "What is the minimum oxygen level for confined space entry?"
+
+Optional API check:
+
+```powershell
+curl -X POST http://localhost:8000/api/v1/rag/query -H "Content-Type: application/json" -d "{\"query\":\"hot work permit requirements\"}"
+```
+
+First backend start may take 1–2 minutes while embeddings index into ChromaDB.
+
+---
+
 ## 5. Run tests (optional but recommended)
 
 ### Backend unit tests (no Docker required)
@@ -191,6 +210,8 @@ docs: add phase 0 architecture and user flow diagrams
 feat: scaffold repo, api contract, and kaggle llm bridge
 feat: add simulator ingestion and time-series storage
 feat: add compound risk engine and realtime alerts
+feat: add geospatial safety map and operations dashboard
+feat: add rag compliance and incident intelligence
 ```
 
 - [ ] Review changes: `git status`
@@ -198,11 +219,9 @@ feat: add compound risk engine and realtime alerts
 
 ---
 
-## 7. Optional — Live LLM via Kaggle (not needed yet)
+## 7. Optional — Live LLM via Kaggle
 
-**Skip this until Feature 4 (RAG)** is built. Until then, the backend uses **mock mode** automatically when `LLM_BASE_URL` is empty.
-
-When you reach RAG / incident intelligence:
+The Incidents page works out of the box with **mock LLM mode** when `LLM_BASE_URL` is empty. For richer, live-generated answers:
 
 - [ ] Create a [Kaggle](https://www.kaggle.com/) account (GPU quota)
 - [ ] Create an [ngrok](https://ngrok.com/) account and copy your authtoken
@@ -227,12 +246,10 @@ Full details: [`kaggle/README.md`](../kaggle/README.md)
 
 | Item | When |
 |---|---|
-| Leaflet / map setup | Phase 4 — Geospatial map |
-| ChromaDB seeding / RAG indexing | Phase 5 — RAG compliance |
 | CCTV / computer vision | Optional phase |
 | Production deployment | Out of scope for prototype |
 
-ChromaDB already starts in Docker Compose but is unused until RAG is implemented.
+First backend startup may take 1–2 minutes while the embedding model downloads and knowledge docs index into ChromaDB.
 
 ---
 
@@ -288,8 +305,9 @@ Stop conflicting services or change ports in `docker-compose.yml`.
 3. [ ] `docker compose up --build` — starts Postgres, Redis, Chroma, backend, frontend
 4. [ ] Open http://localhost:5173
 5. [ ] `docker compose --profile demo up simulator` — confirm **HotWorkGasSpike** alert appears
+6. [ ] Open **Incidents** — ask a compliance question and confirm cited sources
 
-No separate Postgres, Redis, or database setup. No Kaggle/ngrok until RAG (Feature 4).
+No separate Postgres, Redis, or database setup. Kaggle/ngrok is optional for live LLM answers.
 
 ---
 

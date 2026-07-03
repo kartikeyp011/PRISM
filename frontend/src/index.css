@@ -345,3 +345,135 @@ header p {
   padding: 0.25rem 0;
   font-size: 0.875rem;
 }
+
+.rag-chat {
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+}
+
+.rag-chat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.rag-chat-header h2 {
+  margin: 0;
+}
+
+.rag-mode {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+
+.rag-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.rag-example-btn {
+  text-align: left;
+  background: #0f172a;
+  border: 1px solid #334155;
+  color: #94a3b8;
+  border-radius: 6px;
+  padding: 0.4rem 0.6rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.rag-example-btn:hover {
+  border-color: #64748b;
+  color: #e2e8f0;
+}
+
+.rag-messages {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 400px;
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rag-message {
+  background: #0f172a;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+}
+
+.rag-message-user {
+  border-left: 3px solid #3b82f6;
+}
+
+.rag-message-assistant {
+  border-left: 3px solid #22c55e;
+}
+
+.rag-message p {
+  margin: 0.35rem 0 0;
+  white-space: pre-wrap;
+}
+
+.rag-sources h4,
+.rag-related h4 {
+  margin: 0.75rem 0 0.35rem;
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
+
+.rag-source-card button {
+  background: none;
+  border: none;
+  color: #60a5fa;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+  font-size: 0.8rem;
+}
+
+.rag-source-excerpt {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  margin: 0.35rem 0 0;
+}
+
+.rag-related ul {
+  margin: 0;
+  padding-left: 1.2rem;
+  font-size: 0.8rem;
+}
+
+.rag-input-form {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.rag-input-form input {
+  flex: 1;
+  padding: 0.6rem;
+  border-radius: 6px;
+  border: 1px solid #334155;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.rag-input-form button {
+  padding: 0.6rem 1.2rem;
+  border-radius: 6px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  cursor: pointer;
+}
+
+.rag-input-form button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

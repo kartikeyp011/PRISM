@@ -36,6 +36,19 @@ Replays `compound_risk_demo` — alerts fire and the **Safety Map** shows live z
 
 Open **Dashboard** for ingestion + compact map, or **Safety Map** for full-screen view.
 
+### Incident Intelligence (Feature 4)
+
+Open **Incidents** in the nav and ask questions such as:
+
+- "What are the hot work permit requirements?"
+- "What is the minimum oxygen level for confined space entry?"
+
+Knowledge docs auto-index into ChromaDB on backend startup. Re-index manually:
+
+```bash
+docker compose exec backend python -m app.rag.index
+```
+
 ### Optional — Live LLM via Kaggle
 
 See [`kaggle/README.md`](kaggle/README.md), then set `LLM_BASE_URL` in `.env`.
@@ -54,14 +67,14 @@ Single source of truth: [`backend/api_contract.yaml`](backend/api_contract.yaml)
 
 ## Status
 
-**Feature 3 complete** — geospatial safety map and operations dashboard.
+**Feature 4 complete** — RAG compliance and incident intelligence.
 
 | Component | Status |
 |---|---|
 | Simulator + ingestion + TimescaleDB | Done |
 | Risk engine + alerts + WebSocket | Done |
-| **Geospatial map + dashboard UI** | **Done** |
-| RAG compliance | Planned |
+| Geospatial map + dashboard UI | Done |
+| **RAG + Incident Intelligence** | **Done** |
 
 ## Project Docs
 

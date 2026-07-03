@@ -149,3 +149,38 @@ export async function fetchMapLayers(): Promise<MapLayersResponse> {
   if (!res.ok) throw new Error(`Map layers failed: ${res.status}`);
   return res.json();
 }
+
+export interface RagSource {
+  document_id: string;
+  title: string;
+  excerpt: string;
+  score: number;
+}
+
+export interface RagQueryResponse {
+  answer: string;
+  sources: RagSource[];
+  session_id: string;
+  llm_mode: string;
+  related_alerts: { alert_id: string; rule_id: string; severity: string; message: string }[];
+  related_incidents: {
+    incident_id: string;
+    title: string;
+    status: string;
+    occurred_at: string;
+  }[];
+}
+
+export async function fetchRagQuery(
+  query: string,
+  sessionId?: string,
+  topK = 5
+): Promise<RagQueryResponse> {
+  const res = await fetch(`${API_BASE}${API_PATHS.ragQuery}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query, session_id: sessionId, top_k: topK }),
+  });
+  if (!res.ok) throw new Error(`RAG query failed: ${res.status}`);
+  return res.json();
+}

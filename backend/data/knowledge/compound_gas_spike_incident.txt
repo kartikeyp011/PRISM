@@ -1,0 +1,23 @@
+Incident Report Summary: Compound Gas Spike Near-Miss
+
+Document ID: incident-compound-gas-001
+
+Date: 2026-06-15
+Location: Confined Space A, Demo Refinery
+Status: Closed — corrective actions implemented
+
+Summary
+During scheduled maintenance, a hot work permit was active in Confined Space A while LEL sensors detected rising gas levels. A worker entered the zone before gas levels were confirmed safe. LEL peaked at 58% before work was stopped.
+
+Contributing factors
+- Hot work permit issued while gas monitoring showed elevated LEL readings
+- Worker entry occurred before atmospheric verification was complete
+- Compound risk condition: simultaneous hot work, gas spike, and zone occupancy
+
+Corrective actions
+- Reinforced requirement to halt hot work when LEL exceeds 15%
+- Updated permit-to-work checklist to require dual sign-off on gas readings
+- Deployed PRISM compound risk detection for real-time correlation of permits, sensors, and worker location
+
+Lessons learned
+Compound conditions involving permits, gas readings, and worker presence require automated correlation — single-sensor thresholds alone are insufficient.

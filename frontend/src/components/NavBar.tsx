@@ -8,7 +8,7 @@ interface Props {
 const NAV_ITEMS: { id: PageId; label: string; disabled?: boolean }[] = [
   { id: "dashboard", label: "Dashboard" },
   { id: "map", label: "Safety Map" },
-  { id: "incidents", label: "Incidents", disabled: true },
+  { id: "incidents", label: "Incidents" },
 ];
 
 export default function NavBar({ current, onNavigate }: Props) {
@@ -21,7 +21,6 @@ export default function NavBar({ current, onNavigate }: Props) {
           className={current === item.id ? "nav-active" : ""}
           disabled={item.disabled}
           onClick={() => !item.disabled && onNavigate(item.id)}
-          title={item.disabled ? "Coming in Feature 4 (RAG)" : undefined}
         >
           {item.label}
         </button>

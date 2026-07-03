@@ -1,0 +1,25 @@
+Hot Work Permit Standard Operating Procedure (SOP)
+
+Document ID: sop-hot-work-001
+
+1. Scope
+This SOP applies to all welding, cutting, brazing, and other hot work activities in designated plant zones.
+
+2. Pre-work requirements
+Before starting hot work, the following must be completed:
+- Obtain an active hot work permit from the permit office
+- Perform atmospheric gas monitoring (LEL) continuously in the work zone
+- Assign a trained fire watch for the duration of work plus 30 minutes after completion
+- Isolate or shield combustible materials within 35 feet of the work area
+- Post hot work warning signage at zone entry points
+
+3. Gas monitoring thresholds
+- Lower Explosive Limit (LEL) must remain below 10% before work begins
+- Work must stop immediately if LEL exceeds 15%
+- Fire watch must have a functional extinguisher within arm's reach
+
+4. Permit authorization
+Hot work permits are zone-specific. Workers must remain within the authorized zone polygon for the duration of the permit.
+
+5. Emergency response
+If gas levels spike or fire is detected, evacuate the zone, notify control room, and activate the site emergency response plan.

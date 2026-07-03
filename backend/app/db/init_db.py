@@ -4,10 +4,12 @@ from __future__ import annotations
 
 import uuid
 
+from datetime import datetime, timezone
+
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Base, Facility, Sensor, Zone
+from app.db.models import Base, Facility, Incident, IncidentEvidence, Sensor, Zone
 from app.db.session import engine
 
 # Demo facility/zone/sensor IDs used by compound_risk_demo scenario
@@ -15,6 +17,7 @@ DEMO_FACILITY_ID = uuid.UUID("11111111-1111-1111-1111-111111111111")
 DEMO_ZONE_ID = uuid.UUID("22222222-2222-2222-2222-222222222222")
 DEMO_SENSOR_LEL_ID = uuid.UUID("33333333-3333-3333-3333-333333333333")
 DEMO_SENSOR_O2_ID = uuid.UUID("44444444-4444-4444-4444-444444444444")
+DEMO_INCIDENT_ID = uuid.UUID("55555555-5555-5555-5555-555555555555")
 
 
 async def init_db() -> None:
@@ -28,6 +31,7 @@ async def init_db() -> None:
 
     async with AsyncSession(engine) as session:
         await _seed_demo_data(session)
+        await _seed_incident(session)
         await session.commit()
 
 
@@ -90,3 +94,25 @@ async def _seed_demo_data(session: AsyncSession) -> None:
         location="SRID=4326;POINT(-122.4176 37.7746)",
     )
     session.add_all([facility, zone, lel_sensor, o2_sensor])
+
+
+async def _seed_incident(session: AsyncSession) -> None:
+    existing = await session.get(Incident, DEMO_INCIDENT_ID)
+    if existing:
+        return
+
+    incident = Incident(
+        id=DEMO_INCIDENT_ID,
+        title="Compound Gas Spike Near-Miss",
+        status="closed",
+        occurred_at=datetime(2026, 6, 15, 14, 30, tzinfo=timezone.utc),
+    )
+    evidence = IncidentEvidence(
+        incident_id=DEMO_INCIDENT_ID,
+        evidence_type="report",
+        content=(
+            "Hot work permit was active in Confined Space A while LEL rose to 58%. "
+            "Worker entered before atmospheric verification completed."
+        ),
+    )
+    session.add_all([incident, evidence])
