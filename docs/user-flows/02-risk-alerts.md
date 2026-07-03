@@ -1,6 +1,6 @@
 # User Flow — Feature 2: Risk Engine + Alerts
 
-**Status:** Planned (Phase 3)
+**Status:** Complete (Phase 3)
 
 ---
 
@@ -138,10 +138,10 @@ Alerts for the same `(rule_id, zone_id)` within a configurable window (e.g., 5 m
 
 Before moving to Feature 3:
 
-- [ ] Unit: each rule fires with fixture data; each rule silent with safe data
-- [ ] Integration: compound_risk_demo scenario triggers expected alert within 5s
-- [ ] WebSocket: client receives `alert.created` event
-- [ ] UI: alert visible and acknowledgeable
+- [x] Unit: each rule fires with fixture data; each rule silent with safe data
+- [x] Integration: compound_risk_demo scenario triggers expected alert (requires `INTEGRATION_TESTS=1`)
+- [x] WebSocket: client receives `alert.created` event
+- [x] UI: alert visible and acknowledgeable
 
 ---
 

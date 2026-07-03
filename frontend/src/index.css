@@ -89,3 +89,70 @@ header p {
   padding: 0.15rem 0.4rem;
   border-radius: 4px;
 }
+
+.alert-panel {
+  margin-bottom: 1rem;
+}
+
+.alert-list h3,
+.risk-summary h3 {
+  font-size: 0.95rem;
+  margin: 0 0 0.5rem;
+  color: #94a3b8;
+}
+
+.muted {
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.alert-toast {
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid #64748b;
+  background: #0f172a;
+}
+
+.alert-toast header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.alert-toast footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+}
+
+.alert-toast button {
+  background: #334155;
+  color: #e2e8f0;
+  border: none;
+  border-radius: 4px;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+}
+
+.alert-toast button:hover {
+  background: #475569;
+}
+
+.severity-low { border-left-color: #22c55e; }
+.severity-medium { border-left-color: #eab308; }
+.severity-high { border-left-color: #f97316; }
+.severity-critical { border-left-color: #ef4444; }
+
+.risk-summary {
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #334155;
+}
+
+.risk-summary li {
+  padding: 0.25rem 0;
+  font-size: 0.875rem;
+}

@@ -23,6 +23,7 @@ class IngestResult:
     accepted: int
     skipped: int
     event_ids: list[str]
+    zone_ids: list[str]
     status: str
 
 
@@ -35,7 +36,7 @@ def _parse_timestamp(value: str) -> datetime:
 
 async def ingest_events(session: AsyncSession, events: list[IngestEventItem]) -> IngestResult:
     if not events:
-        return IngestResult(accepted=0, skipped=0, event_ids=[], status="accepted")
+        return IngestResult(accepted=0, skipped=0, event_ids=[], zone_ids=[], status="accepted")
 
     event_ids = [e.event_id for e in events]
     existing_result = await session.execute(
@@ -51,6 +52,7 @@ async def ingest_events(session: AsyncSession, events: list[IngestEventItem]) ->
             accepted=0,
             skipped=skipped,
             event_ids=[],
+            zone_ids=[],
             status="duplicate",
         )
 
@@ -96,6 +98,7 @@ async def ingest_events(session: AsyncSession, events: list[IngestEventItem]) ->
         accepted=len(accepted_ids),
         skipped=skipped,
         event_ids=accepted_ids,
+        zone_ids=list(zone_ids),
         status="accepted",
     )
 

@@ -73,6 +73,11 @@ constants:
     HIGH: "#f97316"
     CRITICAL: "#ef4444"
 
+  thresholds:
+    lel_high: 15.0
+    o2_low: 19.5
+    alert_dedup_seconds: 300
+
 redis_topics:
   events_ingest: prism.events.ingest
   alerts: prism.alerts
@@ -131,6 +136,15 @@ endpoints:
       zone_id: string  # optional
     response:
       assessments: array
+      count: integer
+
+  alerts_active:
+    method: GET
+    path: /api/v1/alerts/active
+    query:
+      zone_id: string  # optional
+    response:
+      alerts: array
       count: integer
 
   alerts_ack:

@@ -45,6 +45,8 @@ def get_endpoint_path(name: str) -> str:
 RISK_LEVELS: list[str] = get_constants()["risk_levels"]
 ALERT_STATUSES: list[str] = get_constants()["alert_statuses"]
 EVENT_TYPES: list[str] = get_constants()["event_types"]
+THRESHOLDS: dict[str, float | int] = get_constants()["thresholds"]
+COMPOUND_RULES: list[dict[str, Any]] = get_constants()["compound_rules"]
 
 REDIS_TOPIC_EVENTS_INGEST = get_redis_topics()["events_ingest"]
 REDIS_TOPIC_ALERTS = get_redis_topics()["alerts"]
@@ -57,6 +59,7 @@ PATH_HEALTH = get_endpoint_path("health")
 PATH_INGEST_EVENTS = get_endpoint_path("ingest_events")
 PATH_SENSORS_LATEST = get_endpoint_path("sensors_latest")
 PATH_RISK_ACTIVE = get_endpoint_path("risk_active")
+PATH_ALERTS_ACTIVE = get_endpoint_path("alerts_active")
 PATH_ALERTS_ACK = get_endpoint_path("alerts_ack")
 PATH_MAP_LAYERS = get_endpoint_path("map_layers")
 PATH_RAG_QUERY = get_endpoint_path("rag_query")

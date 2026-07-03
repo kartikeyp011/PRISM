@@ -7,10 +7,13 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.agents.alerts import alert_agent
 from app.agents.ingestion import ingestion_agent
+from app.agents.risk import risk_agent
 from app.config import settings
 from app.contract import (
     PATH_ALERTS_ACK,
+    PATH_ALERTS_ACTIVE,
     PATH_HEALTH,
     PATH_INGEST_EVENTS,
     PATH_MAP_LAYERS,
@@ -26,6 +29,8 @@ from app.db.session import get_session
 from app.models.schemas import (
     AlertAckRequest,
     AlertAckResponse,
+    AlertItem,
+    AlertsActiveResponse,
     HealthResponse,
     IngestEventsRequest,
     IngestEventsResponse,
@@ -34,6 +39,7 @@ from app.models.schemas import (
     RagQueryResponse,
     RagSource,
     RiskActiveResponse,
+    RiskAssessment,
     SensorReading,
     SensorsLatestResponse,
     validate_event_type,
@@ -114,13 +120,71 @@ async def sensors_latest(
 
 
 @router.get(PATH_RISK_ACTIVE, response_model=RiskActiveResponse)
-async def risk_active(zone_id: str | None = None) -> RiskActiveResponse:
-    return RiskActiveResponse(assessments=[], count=0)
+async def risk_active(
+    zone_id: str | None = None,
+    session: AsyncSession = Depends(get_session),
+) -> RiskActiveResponse:
+    try:
+        records = await risk_agent.get_active_assessments(session, zone_id=zone_id)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"Database unavailable: {exc}") from exc
+
+    assessments = [
+        RiskAssessment(
+            assessment_id=str(r.id),
+            zone_id=str(r.zone_id),
+            rule_id=r.rule_id,
+            risk_level=r.risk_level,
+            assessed_at=r.assessed_at.isoformat(),
+            context=r.context,
+        )
+        for r in records
+    ]
+    return RiskActiveResponse(assessments=assessments, count=len(assessments))
+
+
+@router.get(PATH_ALERTS_ACTIVE, response_model=AlertsActiveResponse)
+async def alerts_active(
+    zone_id: str | None = None,
+    session: AsyncSession = Depends(get_session),
+) -> AlertsActiveResponse:
+    try:
+        alerts = await alert_agent.list_active(session, zone_id=zone_id)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"Database unavailable: {exc}") from exc
+
+    items = [
+        AlertItem(
+            alert_id=str(a.id),
+            zone_id=str(a.zone_id),
+            rule_id=a.rule_id,
+            severity=a.severity,
+            status=a.status,
+            message=a.message,
+            created_at=a.created_at.isoformat(),
+        )
+        for a in alerts
+    ]
+    return AlertsActiveResponse(alerts=items, count=len(items))
 
 
 @router.post(PATH_ALERTS_ACK, response_model=AlertAckResponse)
-async def alerts_ack(body: AlertAckRequest) -> AlertAckResponse:
-    return AlertAckResponse(alert_id=body.alert_id, status="ACKNOWLEDGED")
+async def alerts_ack(
+    body: AlertAckRequest,
+    session: AsyncSession = Depends(get_session),
+) -> AlertAckResponse:
+    try:
+        alert = await alert_agent.acknowledge(
+            session, body.alert_id, body.acknowledged_by
+        )
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"Database unavailable: {exc}") from exc
+
+    return AlertAckResponse(alert_id=str(alert.id), status=alert.status)
 
 
 @router.get(PATH_MAP_LAYERS, response_model=MapLayersResponse)

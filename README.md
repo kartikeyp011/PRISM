@@ -24,13 +24,13 @@ docker compose up --build
 - Frontend: http://localhost:5173
 - API docs: http://localhost:8000/docs
 
-### Demo simulator (Feature 1)
+### Demo simulator + alerts (Features 1–2)
 
 ```bash
 docker compose --profile demo up simulator
 ```
 
-Replays `compound_risk_demo` — LEL gas readings, hot-work permit, worker entry in confined zone A.
+Replays `compound_risk_demo` — when LEL exceeds 15% with an active hot-work permit, a **HotWorkGasSpike** alert appears on the dashboard via WebSocket.
 
 ### Optional — Live LLM via Kaggle
 
@@ -39,18 +39,9 @@ See [`kaggle/README.md`](kaggle/README.md), then set `LLM_BASE_URL` in `.env`.
 ## Tests
 
 ```bash
-# Backend unit tests
-cd backend
-pip install -r requirements.txt
-pytest
-
-# Integration tests (postgres + redis required)
+cd backend && pip install -r requirements.txt && pytest
 INTEGRATION_TESTS=1 DATABASE_URL=postgresql+asyncpg://prism:prism@localhost:5432/prism pytest -m integration
-
-# Frontend
-cd frontend
-npm install
-npm test
+cd frontend && npm test
 ```
 
 ## API Contract
@@ -59,15 +50,12 @@ Single source of truth: [`backend/api_contract.yaml`](backend/api_contract.yaml)
 
 ## Status
 
-**Feature 1 complete** — simulator ingestion and time-series storage.
+**Feature 2 complete** — compound risk engine and realtime alerts.
 
 | Component | Status |
 |---|---|
-| Architecture docs | Done |
-| API contract + validator | Done |
-| Docker Compose scaffold | Done |
-| **Simulator + ingestion + TimescaleDB** | **Done** |
-| Risk engine + alerts | Planned |
+| Simulator + ingestion + TimescaleDB | Done |
+| **Risk engine + alerts + WebSocket** | **Done** |
 | Geospatial map | Planned |
 | RAG compliance | Planned |
 

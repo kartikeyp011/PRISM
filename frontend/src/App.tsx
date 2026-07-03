@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { fetchHealth, type HealthResponse } from "./api/client";
+import AlertPanel from "./components/AlertPanel";
 import IngestionStatusPanel from "./components/IngestionStatusPanel";
 
 export default function App() {
@@ -18,6 +19,7 @@ export default function App() {
         <h1>PRISM</h1>
         <p>Predictive Risk &amp; Incident Safety Management System</p>
       </header>
+      <AlertPanel />
       <div className="dashboard-grid">
         <section className="status-card">
           <h2>System Status</h2>

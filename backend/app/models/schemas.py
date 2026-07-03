@@ -74,6 +74,21 @@ class AlertAckResponse(BaseModel):
     status: str
 
 
+class AlertItem(BaseModel):
+    alert_id: str
+    zone_id: str
+    rule_id: str
+    severity: str
+    status: str
+    message: str
+    created_at: str
+
+
+class AlertsActiveResponse(BaseModel):
+    alerts: list[AlertItem]
+    count: int
+
+
 class MapLayersResponse(BaseModel):
     type: str = "FeatureCollection"
     layers: dict[str, Any]

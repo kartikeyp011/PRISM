@@ -40,6 +40,8 @@ class Zone(Base):
     sensors: Mapped[list[Sensor]] = relationship(back_populates="zone")
     permits: Mapped[list[Permit]] = relationship(back_populates="zone")
     worker_locations: Mapped[list[WorkerLocation]] = relationship(back_populates="zone")
+    risk_assessments: Mapped[list["RiskAssessmentRecord"]] = relationship(back_populates="zone")
+    alerts: Mapped[list["Alert"]] = relationship(back_populates="zone")
 
 
 class Asset(Base):
@@ -123,3 +125,41 @@ class RawEvent(Base):
     received_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now()
     )
+
+
+class RiskAssessmentRecord(Base):
+    __tablename__ = "risk_assessments"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    zone_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("zones.id"), nullable=False
+    )
+    rule_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    risk_level: Mapped[str] = mapped_column(String(32), nullable=False)
+    context: Mapped[dict] = mapped_column(JSONB, nullable=False, default=dict)
+    assessed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    zone: Mapped[Zone] = relationship(back_populates="risk_assessments")
+    alerts: Mapped[list[Alert]] = relationship(back_populates="risk_assessment")
+
+
+class Alert(Base):
+    __tablename__ = "alerts"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    zone_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("zones.id"), nullable=False
+    )
+    risk_assessment_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("risk_assessments.id"), nullable=True
+    )
+    rule_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    severity: Mapped[str] = mapped_column(String(32), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="ACTIVE")
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    acked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    acknowledged_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+
+    zone: Mapped[Zone] = relationship(back_populates="alerts")
+    risk_assessment: Mapped[RiskAssessmentRecord | None] = relationship(back_populates="alerts")
