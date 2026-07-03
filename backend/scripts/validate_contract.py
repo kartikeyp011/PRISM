@@ -94,6 +94,8 @@ def validate_constants(contract: dict) -> list[str]:
         errors.append("ALERT_STATUSES constant drift from contract")
     if contract_module.EVENT_TYPES != contract["constants"]["event_types"]:
         errors.append("EVENT_TYPES constant drift from contract")
+    if contract_module.RISK_COLORS != contract["constants"]["risk_colors"]:
+        errors.append("RISK_COLORS constant drift from contract")
     return errors
 
 

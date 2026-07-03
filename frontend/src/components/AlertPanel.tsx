@@ -16,7 +16,11 @@ const SEVERITY_CLASS: Record<string, string> = {
   CRITICAL: "severity-critical",
 };
 
-export default function AlertPanel() {
+interface Props {
+  compact?: boolean;
+}
+
+export default function AlertPanel({ compact = false }: Props) {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [riskSummary, setRiskSummary] = useState<RiskAssessment[]>([]);
   const [error, setError] = useState<string | null>(null);
@@ -101,29 +105,34 @@ export default function AlertPanel() {
   };
 
   return (
-    <section className="status-card alert-panel">
-      <h2>Alerts</h2>
+    <section className={`alert-panel ${compact ? "alert-strip" : "status-card"}`}>
+      {!compact && <h2>Alerts</h2>}
+      {compact && alerts.length > 0 && (
+        <span className="alert-strip-label">Active alerts:</span>
+      )}
       {error && <p className="error">{error}</p>}
 
-      <div className="risk-summary">
-        <h3>Active Risk</h3>
-        {riskSummary.length === 0 ? (
-          <p className="muted">No elevated zones</p>
-        ) : (
-          <ul>
-            {riskSummary.map((r) => (
-              <li key={r.assessment_id} className={SEVERITY_CLASS[r.risk_level]}>
-                {r.rule_id} — {r.risk_level} (zone {r.zone_id.slice(0, 8)}…)
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+      {!compact && (
+        <div className="risk-summary">
+          <h3>Active Risk</h3>
+          {riskSummary.length === 0 ? (
+            <p className="muted">No elevated zones</p>
+          ) : (
+            <ul>
+              {riskSummary.map((r) => (
+                <li key={r.assessment_id} className={SEVERITY_CLASS[r.risk_level]}>
+                  {r.rule_id} — {r.risk_level} (zone {r.zone_id.slice(0, 8)}…)
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
-      <div className="alert-list">
-        <h3>Active Alerts ({alerts.length})</h3>
+      <div className={compact ? "alert-strip-list" : "alert-list"}>
+        {!compact && <h3>Active Alerts ({alerts.length})</h3>}
         {alerts.length === 0 ? (
-          <p className="muted">No active alerts</p>
+          !compact && <p className="muted">No active alerts</p>
         ) : (
           alerts.map((alert) => (
             <article
@@ -134,11 +143,13 @@ export default function AlertPanel() {
                 <strong>{alert.rule_id}</strong>
                 <span>{alert.severity}</span>
               </header>
-              <p>{alert.message}</p>
+              {!compact && <p>{alert.message}</p>}
               <footer>
-                <time>{new Date(alert.created_at).toLocaleString()}</time>
+                {!compact && (
+                  <time>{new Date(alert.created_at).toLocaleString()}</time>
+                )}
                 <button type="button" onClick={() => handleAck(alert.alert_id)}>
-                  Acknowledge
+                  Ack
                 </button>
               </footer>
             </article>

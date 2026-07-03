@@ -47,6 +47,7 @@ ALERT_STATUSES: list[str] = get_constants()["alert_statuses"]
 EVENT_TYPES: list[str] = get_constants()["event_types"]
 THRESHOLDS: dict[str, float | int] = get_constants()["thresholds"]
 COMPOUND_RULES: list[dict[str, Any]] = get_constants()["compound_rules"]
+RISK_COLORS: dict[str, str] = get_constants()["risk_colors"]
 
 REDIS_TOPIC_EVENTS_INGEST = get_redis_topics()["events_ingest"]
 REDIS_TOPIC_ALERTS = get_redis_topics()["alerts"]

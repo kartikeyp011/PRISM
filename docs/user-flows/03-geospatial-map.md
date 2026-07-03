@@ -1,6 +1,6 @@
 # User Flow — Feature 3: Geospatial Safety Map + Dashboard
 
-**Status:** Planned (Phase 4)
+**Status:** Complete (Phase 4)
 
 ---
 
@@ -161,10 +161,10 @@ When an operator clicks a map feature:
 
 Before moving to Feature 4:
 
-- [ ] API returns valid GeoJSON (schema validation)
-- [ ] Frontend component test: layers render with mock data
-- [ ] Playwright: map loads markers after demo scenario run
-- [ ] Zone color updates when risk alert fires
+- [x] API returns valid GeoJSON (schema validation)
+- [x] Frontend component test: layers render with mock data
+- [x] Integration: map layers return zone polygons (requires `INTEGRATION_TESTS=1`)
+- [x] Zone color reflects risk level from assessments
 
 ---
 

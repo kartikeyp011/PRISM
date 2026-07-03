@@ -162,6 +162,7 @@ endpoints:
     path: /api/v1/map/layers
     response:
       type: FeatureCollection
+      risk_colors: object
       layers:
         zones: object
         sensors: object

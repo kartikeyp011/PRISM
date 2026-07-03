@@ -23,11 +23,22 @@ async def init_db() -> None:
         await conn.execute(text("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE"))
         await conn.run_sync(Base.metadata.create_all)
         await _ensure_hypertable(conn)
-        await conn.execute(text("SELECT 1"))  # keep connection alive for seed in session
+        await _ensure_spatial_indexes(conn)
+        await conn.execute(text("SELECT 1"))
 
     async with AsyncSession(engine) as session:
         await _seed_demo_data(session)
         await session.commit()
+
+
+async def _ensure_spatial_indexes(conn) -> None:
+    indexes = [
+        "CREATE INDEX IF NOT EXISTS idx_zones_polygon ON zones USING GIST (polygon)",
+        "CREATE INDEX IF NOT EXISTS idx_sensors_location ON sensors USING GIST (location)",
+        "CREATE INDEX IF NOT EXISTS idx_worker_locations_location ON worker_locations USING GIST (location)",
+    ]
+    for stmt in indexes:
+        await conn.execute(text(stmt))
 
 
 async def _ensure_hypertable(conn) -> None:

@@ -10,7 +10,7 @@ interface Props {
 }
 
 export default function IngestionStatusPanel({ pollIntervalMs = 5000 }: Props) {
-  const [scenario, setScenario] = useState(SCENARIOS[0].id);
+  const [scenario, setScenario] = useState<string>(SCENARIOS[0].id);
   const [data, setData] = useState<SensorsLatestResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
 

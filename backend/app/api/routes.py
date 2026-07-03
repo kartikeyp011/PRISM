@@ -44,7 +44,7 @@ from app.models.schemas import (
     SensorsLatestResponse,
     validate_event_type,
 )
-from app.services.llm_client import ChatMessage, llm_client
+from app.map.service import build_map_layers
 
 router = APIRouter()
 CONTRACT_VERSION = "1.0.0"
@@ -188,20 +188,17 @@ async def alerts_ack(
 
 
 @router.get(PATH_MAP_LAYERS, response_model=MapLayersResponse)
-async def map_layers() -> MapLayersResponse:
-    empty_fc = {"type": "FeatureCollection", "features": []}
-    return MapLayersResponse(
-        layers={
-            "zones": empty_fc,
-            "sensors": empty_fc,
-            "workers": empty_fc,
-            "permits": empty_fc,
-        }
-    )
+async def map_layers(session: AsyncSession = Depends(get_session)) -> MapLayersResponse:
+    try:
+        data = await build_map_layers(session)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"Database unavailable: {exc}") from exc
+    return MapLayersResponse(**data)
 
 
 @router.post(PATH_RAG_QUERY, response_model=RagQueryResponse)
 async def rag_query(body: RagQueryRequest) -> RagQueryResponse:
+    from app.services.llm_client import ChatMessage, llm_client
     session_id = body.session_id or str(uuid.uuid4())
     result = await llm_client.chat(
         [

@@ -68,6 +68,29 @@ export interface AlertsActiveResponse {
   count: number;
 }
 
+export interface GeoJsonFeatureCollection {
+  type: "FeatureCollection";
+  features: GeoJsonFeature[];
+}
+
+export interface GeoJsonFeature {
+  type: "Feature";
+  id?: string;
+  geometry: { type: string; coordinates: unknown };
+  properties: Record<string, unknown>;
+}
+
+export interface MapLayersResponse {
+  type: string;
+  risk_colors: Record<string, string>;
+  layers: {
+    zones: GeoJsonFeatureCollection;
+    sensors: GeoJsonFeatureCollection;
+    workers: GeoJsonFeatureCollection;
+    permits: GeoJsonFeatureCollection;
+  };
+}
+
 export const SCENARIOS = [
   { id: "compound_risk_demo", label: "Compound Risk Demo" },
 ] as const;
@@ -118,5 +141,11 @@ export async function acknowledgeAlert(
     }),
   });
   if (!res.ok) throw new Error(`Alert ack failed: ${res.status}`);
+  return res.json();
+}
+
+export async function fetchMapLayers(): Promise<MapLayersResponse> {
+  const res = await fetch(`${API_BASE}${API_PATHS.mapLayers}`);
+  if (!res.ok) throw new Error(`Map layers failed: ${res.status}`);
   return res.json();
 }

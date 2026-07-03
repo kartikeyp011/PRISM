@@ -91,6 +91,7 @@ class AlertsActiveResponse(BaseModel):
 
 class MapLayersResponse(BaseModel):
     type: str = "FeatureCollection"
+    risk_colors: dict[str, str] = Field(default_factory=dict)
     layers: dict[str, Any]
 
 

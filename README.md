@@ -15,6 +15,8 @@
 
 ## Setup
 
+**Manual steps for you:** see [`docs/YOUR_SETUP_CHECKLIST.md`](docs/YOUR_SETUP_CHECKLIST.md)
+
 ```bash
 cp .env.example .env
 docker compose up --build
@@ -30,7 +32,9 @@ docker compose up --build
 docker compose --profile demo up simulator
 ```
 
-Replays `compound_risk_demo` — when LEL exceeds 15% with an active hot-work permit, a **HotWorkGasSpike** alert appears on the dashboard via WebSocket.
+Replays `compound_risk_demo` — alerts fire and the **Safety Map** shows live zones, sensors, workers, and permits.
+
+Open **Dashboard** for ingestion + compact map, or **Safety Map** for full-screen view.
 
 ### Optional — Live LLM via Kaggle
 
@@ -50,13 +54,13 @@ Single source of truth: [`backend/api_contract.yaml`](backend/api_contract.yaml)
 
 ## Status
 
-**Feature 2 complete** — compound risk engine and realtime alerts.
+**Feature 3 complete** — geospatial safety map and operations dashboard.
 
 | Component | Status |
 |---|---|
 | Simulator + ingestion + TimescaleDB | Done |
-| **Risk engine + alerts + WebSocket** | **Done** |
-| Geospatial map | Planned |
+| Risk engine + alerts + WebSocket | Done |
+| **Geospatial map + dashboard UI** | **Done** |
 | RAG compliance | Planned |
 
 ## Project Docs
