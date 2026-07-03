@@ -2,92 +2,121 @@
 
 **Predictive Risk & Incident Safety Management System** — a multi-agent AI platform for zero-harm operations in heavy industrial facilities.
 
-## Tech Stack
-
-- **Backend:** Python 3.12, FastAPI
-- **Database:** PostgreSQL 16 + PostGIS + TimescaleDB
-- **Cache:** Redis 7
-- **Vector store:** ChromaDB
-- **Frontend:** React 18, TypeScript, Vite
-- **Map:** Leaflet + OpenStreetMap
-- **LLM:** Ollama on Kaggle, exposed via ngrok
-- **Orchestration:** Docker Compose
-
-## Setup
-
-**Manual steps for you:** see [`docs/YOUR_SETUP_CHECKLIST.md`](docs/YOUR_SETUP_CHECKLIST.md)
+## Quick start
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-- Backend API: http://localhost:8000
-- Frontend: http://localhost:5173
-- API docs: http://localhost:8000/docs
+Open http://localhost:5173
 
-### Demo simulator + alerts (Features 1–2)
+**Full demo walkthrough:** [`docs/DEMO_RUNBOOK.md`](docs/DEMO_RUNBOOK.md)  
+**Setup checklist:** [`docs/YOUR_SETUP_CHECKLIST.md`](docs/YOUR_SETUP_CHECKLIST.md)
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Backend | Python 3.12, FastAPI |
+| Database | PostgreSQL 16 + PostGIS + TimescaleDB |
+| Cache | Redis 7 |
+| Vector store | ChromaDB |
+| Frontend | React 18, TypeScript, Vite |
+| Map | Leaflet + OpenStreetMap |
+| LLM | Ollama on Kaggle via ngrok (mock mode default) |
+| CV | YOLOv8 via ultralytics (mock mode default) |
+| Orchestration | Docker Compose |
+| Testing | pytest, Vitest, Playwright |
+
+## Services
+
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:5173 |
+| Backend API | http://localhost:8000 |
+| API docs | http://localhost:8000/docs |
+
+## Demo (5 minutes)
 
 ```bash
+# Terminal 1
+docker compose up --build
+
+# Terminal 2 — replay compound risk scenario
 docker compose --profile demo up simulator
 ```
 
-Replays `compound_risk_demo` — alerts fire and the **Safety Map** shows live zones, sensors, workers, and permits.
+Then on the dashboard:
 
-Open **Dashboard** for ingestion + compact map, or **Safety Map** for full-screen view.
+1. Watch **HotWorkGasSpike** alert appear
+2. Open **Safety Map** → run **CCTV Analysis** (Missing PPE sample)
+3. Open **Incidents** → ask a hot work SOP question
 
-### Incident Intelligence (Feature 4)
-
-Open **Incidents** in the nav and ask questions such as:
-
-- "What are the hot work permit requirements?"
-- "What is the minimum oxygen level for confined space entry?"
-
-Knowledge docs auto-index into ChromaDB on backend startup. Re-index manually:
-
-```bash
-docker compose exec backend python -m app.rag.index
-```
-
-### CCTV Analysis (Feature 5 — optional)
-
-Open **Safety Map** → **CCTV Analysis** panel:
-
-1. Select a demo sample (e.g. **Missing PPE**)
-2. Click **Analyze frame**
-3. Camera marker updates on the map (orange = warning, red = critical)
-
-Mock CV mode is default (`CV_ENABLED=false`). Set `CV_ENABLED=true` for live YOLOv8 inference.
-
-### Optional — Live LLM via Kaggle
-
-See [`kaggle/README.md`](kaggle/README.md), then set `LLM_BASE_URL` in `.env`.
+See [`docs/DEMO_RUNBOOK.md`](docs/DEMO_RUNBOOK.md) for the full presenter script.
 
 ## Tests
 
+### Unit tests (no Docker)
+
 ```bash
-cd backend && pip install -r requirements.txt && pytest
-INTEGRATION_TESTS=1 DATABASE_URL=postgresql+asyncpg://prism:prism@localhost:5432/prism pytest -m integration
-cd frontend && npm test
+cd backend && pip install -r requirements.txt && pytest -k "not integration"
+cd frontend && npm install && npm test
+python backend/scripts/validate_contract.py
+```
+
+### Integration tests (Docker running)
+
+```powershell
+cd backend
+$env:INTEGRATION_TESTS = "1"
+$env:DATABASE_URL = "postgresql+asyncpg://prism:prism@localhost:5432/prism"
+pytest -m integration
+```
+
+### Playwright E2E smoke tests
+
+Requires the stack running on :5173 (and :8000 for the RAG happy-path test):
+
+```powershell
+cd frontend
+npm install
+npx playwright install chromium
+$env:PLAYWRIGHT_SKIP_WEBSERVER = "1"
+npm run test:e2e
+```
+
+### All tests (helper script)
+
+```powershell
+.\scripts\run_all_tests.ps1                      # unit only
+.\scripts\run_all_tests.ps1 -Integration         # + backend integration
+.\scripts\run_all_tests.ps1 -Integration -E2E    # + Playwright
 ```
 
 ## API Contract
 
 Single source of truth: [`backend/api_contract.yaml`](backend/api_contract.yaml)
 
-## Status
+Validate: `python backend/scripts/validate_contract.py`
 
-**Feature 5 complete** — optional CCTV computer vision pipeline.
+## Project Status
 
-| Component | Status |
-|---|---|
-| Simulator + ingestion + TimescaleDB | Done |
-| Risk engine + alerts + WebSocket | Done |
-| Geospatial map + dashboard UI | Done |
-| RAG + Incident Intelligence | Done |
-| **CCTV CV analysis + map overlay** | **Done** |
+**Prototype complete** — all planned features implemented and tested.
+
+| Feature | Description | Status |
+|---|---|---|
+| 1 — Ingestion | Simulator, TimescaleDB, ingest API | Done |
+| 2 — Risk + Alerts | Compound rules, WebSocket, alert UI | Done |
+| 3 — Safety Map | PostGIS GeoJSON, Leaflet dashboard | Done |
+| 4 — RAG | ChromaDB, compliance chat, incidents | Done |
+| 5 — CV (optional) | Mock/YOLOv8 CCTV analysis, map overlay | Done |
+
+Mock modes for LLM (`LLM_BASE_URL` empty) and CV (`CV_ENABLED=false`) work without external services.
 
 ## Project Docs
 
-- [`docs/architecture.md`](docs/architecture.md)
-- [`docs/user-flows/`](docs/user-flows/)
+- [`docs/architecture.md`](docs/architecture.md) — system design
+- [`docs/DEMO_RUNBOOK.md`](docs/DEMO_RUNBOOK.md) — end-to-end demo script
+- [`docs/user-flows/`](docs/user-flows/) — per-feature flows
+- [`kaggle/README.md`](kaggle/README.md) — optional live LLM setup

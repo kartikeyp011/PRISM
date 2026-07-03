@@ -16,10 +16,12 @@ async def test_map_layers_returns_valid_geojson(integration_client):
     assert "risk_colors" in data
     assert "LOW" in data["risk_colors"]
 
-    for layer_name in ("zones", "sensors", "workers", "permits"):
+    for layer_name in ("zones", "sensors", "workers", "permits", "cameras"):
         layer = data["layers"][layer_name]
         assert layer["type"] == "FeatureCollection"
         assert isinstance(layer["features"], list)
+
+    assert "cv_hazard_colors" in data
 
     zones = data["layers"]["zones"]["features"]
     assert len(zones) >= 1

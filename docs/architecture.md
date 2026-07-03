@@ -31,6 +31,7 @@ flowchart TB
         RiskEngine[Risk_Detection_Engine]
         AlertOrch[Alert_Orchestrator]
         RAG[RAG_Compliance_Service]
+        CV[CV_Vision_Service]
         Redis[(Redis)]
         PG[(Postgres_PostGIS_TimescaleDB)]
         Chroma[(ChromaDB)]
@@ -48,6 +49,8 @@ flowchart TB
     RAG --> Chroma
     RAG -->|HTTP| NgrokTunnel
     API --> RAG
+    API --> CV
+    CV --> PG
     RiskEngine --> PG
 ```
 
@@ -141,6 +144,8 @@ erDiagram
     zones ||--o{ risk_assessments : evaluates
     zones ||--o{ alerts : triggers
     incidents ||--o{ incident_evidence : has
+    zones ||--o{ cameras : monitors
+    cameras ||--o{ cv_analyses : produces
 
     facilities {
         uuid id PK
@@ -235,6 +240,24 @@ erDiagram
         string evidence_type
         text content
     }
+
+    cameras {
+        uuid id PK
+        uuid zone_id FK
+        string name
+        geometry point
+        string status
+    }
+
+    cv_analyses {
+        uuid id PK
+        uuid camera_id FK
+        string sample_id
+        string cv_mode
+        jsonb detections
+        jsonb hazards
+        timestamptz analyzed_at
+    }
 ```
 
 ### Time-Series
@@ -265,7 +288,70 @@ Endpoint: `/ws/alerts`
 
 ---
 
-## Repository Layout (Target)
+## REST API (v1)
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/v1/health` | Service health + LLM mode |
+| POST | `/api/v1/ingest/events` | Batch event ingestion |
+| GET | `/api/v1/sensors/latest` | Latest sensor readings |
+| GET | `/api/v1/risk/active` | Active risk assessments |
+| GET | `/api/v1/alerts/active` | Active alerts |
+| POST | `/api/v1/alerts/ack` | Acknowledge alert |
+| GET | `/api/v1/map/layers` | GeoJSON map layers (zones, sensors, workers, permits, cameras) |
+| GET | `/api/v1/cv/samples` | Demo CCTV sample catalog |
+| POST | `/api/v1/cv/analyze` | Frame analysis (mock or YOLOv8) |
+| POST | `/api/v1/rag/query` | RAG compliance query |
+
+WebSocket: `/ws/alerts` — `alert.created`, `alert.updated`, `risk.changed`
+
+Full schemas: [`backend/api_contract.yaml`](../backend/api_contract.yaml)
+
+---
+
+## Repository Layout
+
+```
+PRISM/
+├── backend/
+│   ├── api_contract.yaml
+│   ├── app/
+│   │   ├── agents/          # Ingestion, Risk, Alert, Compliance, Vision
+│   │   ├── ingestion/
+│   │   ├── risk/
+│   │   ├── alerts/
+│   │   ├── rag/
+│   │   ├── cv/
+│   │   ├── map/
+│   │   ├── models/
+│   │   └── api/
+│   ├── data/knowledge/      # RAG seed docs
+│   ├── data/cv_samples/     # Demo CCTV frames
+│   ├── tests/unit/
+│   ├── tests/integration/
+│   └── scripts/validate_contract.py
+├── frontend/
+│   ├── src/pages/           # Dashboard, SafetyMap, Incidents
+│   ├── src/components/
+│   ├── e2e/                 # Playwright smoke tests
+│   └── playwright.config.ts
+├── simulator/scenarios/
+├── kaggle/
+├── docs/
+│   ├── architecture.md
+│   ├── DEMO_RUNBOOK.md
+│   └── user-flows/
+├── scripts/run_all_tests.ps1
+├── docker-compose.yml
+└── README.md
+```
+
+---
+
+## Repository Layout (legacy reference)
+
+<details>
+<summary>Original Phase 0 layout (superseded by above)</summary>
 
 ```
 PRISM/
@@ -306,15 +392,18 @@ PRISM/
 └── README.md
 ```
 
+</details>
+
 ---
 
-## Shared Constants (Preview)
+## Shared Constants
 
-Defined in `backend/api_contract.yaml` (Phase 1):
+Defined in `backend/api_contract.yaml`:
 
 - **Risk levels:** `LOW` | `MEDIUM` | `HIGH` | `CRITICAL`
 - **Alert statuses:** `ACTIVE` | `ACKNOWLEDGED` | `RESOLVED`
 - **Event types:** `sensor_reading` | `permit_update` | `worker_location`
+- **CV hazard colors:** `normal` | `warning` | `critical`
 
 ---
 
@@ -323,3 +412,4 @@ Defined in `backend/api_contract.yaml` (Phase 1):
 | Date | Change |
 |---|---|
 | 2026-07-02 | Initial architecture document (Phase 0) |
+| 2026-07-03 | Added VisionAgent, CV pipeline, cameras entity, REST table, demo runbook refs (Phase 7) |

@@ -199,6 +199,25 @@ npm install
 npm test
 ```
 
+### Playwright E2E smoke tests (stack must be running)
+
+```powershell
+cd frontend
+npx playwright install chromium
+$env:PLAYWRIGHT_SKIP_WEBSERVER = "1"
+npm run test:e2e
+```
+
+- [ ] E2E tests pass (dashboard, map, incidents UI)
+
+### All tests at once
+
+```powershell
+.\scripts\run_all_tests.ps1 -Integration -E2E
+```
+
+See also [`docs/DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md) for the full demo script.
+
 ---
 
 ## 6. Git commits (when you are ready)
@@ -212,6 +231,8 @@ feat: add simulator ingestion and time-series storage
 feat: add compound risk engine and realtime alerts
 feat: add geospatial safety map and operations dashboard
 feat: add rag compliance and incident intelligence
+feat: add optional cctv cv analysis pipeline
+chore: finalize demo docs and integration tests
 ```
 
 - [ ] Review changes: `git status`
@@ -310,6 +331,7 @@ Stop conflicting services or change ports in `docker-compose.yml`.
 4. [ ] Open http://localhost:5173
 5. [ ] `docker compose --profile demo up simulator` — confirm **HotWorkGasSpike** alert appears
 6. [ ] Open **Incidents** — ask a compliance question and confirm cited sources
+7. [ ] Follow [`docs/DEMO_RUNBOOK.md`](DEMO_RUNBOOK.md) for the full walkthrough
 
 No separate Postgres, Redis, or database setup. Kaggle/ngrok is optional for live LLM answers.
 
@@ -320,3 +342,4 @@ No separate Postgres, Redis, or database setup. Kaggle/ngrok is optional for liv
 | Date | Notes |
 |---|---|
 | 2026-07-03 | Created after Feature 2 completion |
+| 2026-07-03 | Phase 7 — Playwright E2E, demo runbook, test helper script |

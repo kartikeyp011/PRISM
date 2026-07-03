@@ -11,3 +11,9 @@ dist/
 postgres_data/
 chroma_data/
 .DS_Store
+
+# Playwright
+frontend/test-results/
+frontend/playwright-report/
+frontend/blob-report/
+frontend/playwright/.cache/
