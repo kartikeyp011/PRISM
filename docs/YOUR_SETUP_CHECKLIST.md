@@ -251,6 +251,10 @@ Full details: [`kaggle/README.md`](../kaggle/README.md)
 
 First backend startup may take 1–2 minutes while the embedding model downloads and knowledge docs index into ChromaDB.
 
+### CCTV analysis (Feature 5)
+
+On **Safety Map**, use the **CCTV Analysis** panel with demo samples. Mock mode is default; set `CV_ENABLED=true` in `.env` for live YOLOv8.
+
 ---
 
 ## 9. Troubleshooting

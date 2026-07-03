@@ -1,7 +1,7 @@
 import type { AlertItem } from "../api/client";
 
 export interface SelectedFeature {
-  layer: "zones" | "sensors" | "workers" | "permits";
+  layer: "zones" | "sensors" | "workers" | "permits" | "cameras";
   properties: Record<string, unknown>;
 }
 
@@ -78,6 +78,43 @@ export default function MapDetailDrawer({
           <dt>Status</dt>
           <dd>{String(properties.status)}</dd>
         </dl>
+      )}
+
+      {layer === "cameras" && (
+        <>
+          <dl>
+            <dt>Camera</dt>
+            <dd>{String(properties.name)}</dd>
+            <dt>Status</dt>
+            <dd>{String(properties.status)}</dd>
+            <dt>Hazard status</dt>
+            <dd>{String(properties.hazard_status ?? "normal")}</dd>
+            {properties.last_analyzed_at != null && (
+              <>
+                <dt>Last analyzed</dt>
+                <dd>
+                  {new Date(String(properties.last_analyzed_at)).toLocaleString()}
+                </dd>
+              </>
+            )}
+          </dl>
+          {Array.isArray(properties.last_hazards) &&
+            (properties.last_hazards as { type: string; severity: string; message: string }[])
+              .length > 0 && (
+              <section>
+                <h4>CV hazards</h4>
+                <ul>
+                  {(properties.last_hazards as { type: string; severity: string; message: string }[]).map(
+                    (h) => (
+                      <li key={h.type}>
+                        {h.type} — {h.severity}
+                      </li>
+                    )
+                  )}
+                </ul>
+              </section>
+            )}
+        </>
       )}
 
       {readings.length > 0 && (

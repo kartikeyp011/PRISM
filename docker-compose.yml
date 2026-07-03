@@ -47,6 +47,8 @@ services:
       CHROMA_URL: ${CHROMA_URL:-http://chroma:8000}
       LLM_BASE_URL: ${LLM_BASE_URL:-}
       LLM_MODEL: ${LLM_MODEL:-llama3.2}
+      CV_ENABLED: ${CV_ENABLED:-false}
+      CV_MODEL: ${CV_MODEL:-yolov8n.pt}
     volumes:
       - ./backend:/app
     depends_on:

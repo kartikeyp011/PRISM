@@ -42,6 +42,7 @@ class Zone(Base):
     worker_locations: Mapped[list[WorkerLocation]] = relationship(back_populates="zone")
     risk_assessments: Mapped[list["RiskAssessmentRecord"]] = relationship(back_populates="zone")
     alerts: Mapped[list["Alert"]] = relationship(back_populates="zone")
+    cameras: Mapped[list["Camera"]] = relationship(back_populates="zone")
 
 
 class Asset(Base):
@@ -68,6 +69,37 @@ class Sensor(Base):
 
     zone: Mapped[Zone] = relationship(back_populates="sensors")
     readings: Mapped[list[SensorReading]] = relationship(back_populates="sensor")
+
+
+class Camera(Base):
+    __tablename__ = "cameras"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    zone_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("zones.id"), nullable=False
+    )
+    name: Mapped[str] = mapped_column(String(255), nullable=False)
+    location = mapped_column(Geometry("POINT", srid=4326), nullable=True)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, default="online")
+
+    zone: Mapped[Zone] = relationship(back_populates="cameras")
+    analyses: Mapped[list["CvAnalysis"]] = relationship(back_populates="camera")
+
+
+class CvAnalysis(Base):
+    __tablename__ = "cv_analyses"
+
+    id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    camera_id: Mapped[uuid.UUID | None] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("cameras.id"), nullable=True
+    )
+    sample_id: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    cv_mode: Mapped[str] = mapped_column(String(16), nullable=False)
+    detections: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    hazards: Mapped[list] = mapped_column(JSONB, nullable=False, default=list)
+    analyzed_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+
+    camera: Mapped[Camera | None] = relationship(back_populates="analyses")
 
 
 class SensorReading(Base):

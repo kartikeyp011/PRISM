@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Base, Facility, Incident, IncidentEvidence, Sensor, Zone
+from app.db.models import Base, Camera, Facility, Incident, IncidentEvidence, Sensor, Zone
 from app.db.session import engine
 
 # Demo facility/zone/sensor IDs used by compound_risk_demo scenario
@@ -18,6 +18,7 @@ DEMO_ZONE_ID = uuid.UUID("22222222-2222-2222-2222-222222222222")
 DEMO_SENSOR_LEL_ID = uuid.UUID("33333333-3333-3333-3333-333333333333")
 DEMO_SENSOR_O2_ID = uuid.UUID("44444444-4444-4444-4444-444444444444")
 DEMO_INCIDENT_ID = uuid.UUID("55555555-5555-5555-5555-555555555555")
+DEMO_CAMERA_ID = uuid.UUID("66666666-6666-6666-6666-666666666666")
 
 
 async def init_db() -> None:
@@ -32,6 +33,7 @@ async def init_db() -> None:
     async with AsyncSession(engine) as session:
         await _seed_demo_data(session)
         await _seed_incident(session)
+        await _seed_camera(session)
         await session.commit()
 
 
@@ -40,6 +42,7 @@ async def _ensure_spatial_indexes(conn) -> None:
         "CREATE INDEX IF NOT EXISTS idx_zones_polygon ON zones USING GIST (polygon)",
         "CREATE INDEX IF NOT EXISTS idx_sensors_location ON sensors USING GIST (location)",
         "CREATE INDEX IF NOT EXISTS idx_worker_locations_location ON worker_locations USING GIST (location)",
+        "CREATE INDEX IF NOT EXISTS idx_cameras_location ON cameras USING GIST (location)",
     ]
     for stmt in indexes:
         await conn.execute(text(stmt))
@@ -116,3 +119,18 @@ async def _seed_incident(session: AsyncSession) -> None:
         ),
     )
     session.add_all([incident, evidence])
+
+
+async def _seed_camera(session: AsyncSession) -> None:
+    existing = await session.get(Camera, DEMO_CAMERA_ID)
+    if existing:
+        return
+
+    camera = Camera(
+        id=DEMO_CAMERA_ID,
+        zone_id=DEMO_ZONE_ID,
+        name="CCTV — Confined Space A Entry",
+        location="SRID=4326;POINT(-122.4174 37.7744)",
+        status="online",
+    )
+    session.add(camera)

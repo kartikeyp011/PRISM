@@ -6,6 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents.alerts import alert_agent
+from app.agents.vision import vision_agent
 from app.agents.compliance import compliance_agent
 from app.agents.ingestion import ingestion_agent
 from app.agents.risk import risk_agent
@@ -15,6 +16,8 @@ from app.contract import (
     PATH_ALERTS_ACTIVE,
     PATH_HEALTH,
     PATH_INGEST_EVENTS,
+    PATH_CV_ANALYZE,
+    PATH_CV_SAMPLES,
     PATH_MAP_LAYERS,
     PATH_RAG_QUERY,
     PATH_RISK_ACTIVE,
@@ -30,6 +33,12 @@ from app.models.schemas import (
     AlertAckResponse,
     AlertItem,
     AlertsActiveResponse,
+    CvAnalyzeRequest,
+    CvAnalyzeResponse,
+    CvDetectionItem,
+    CvHazardItem,
+    CvSampleItem,
+    CvSamplesResponse,
     HealthResponse,
     IngestEventsRequest,
     IngestEventsResponse,
@@ -193,6 +202,48 @@ async def map_layers(session: AsyncSession = Depends(get_session)) -> MapLayersR
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"Database unavailable: {exc}") from exc
     return MapLayersResponse(**data)
+
+
+@router.get(PATH_CV_SAMPLES, response_model=CvSamplesResponse)
+async def cv_samples() -> CvSamplesResponse:
+    samples = await vision_agent.list_samples()
+    items = [CvSampleItem(**s) for s in samples]
+    return CvSamplesResponse(samples=items, count=len(items))
+
+
+@router.post(PATH_CV_ANALYZE, response_model=CvAnalyzeResponse)
+async def cv_analyze(
+    body: CvAnalyzeRequest,
+    session: AsyncSession = Depends(get_session),
+) -> CvAnalyzeResponse:
+    if not body.camera_id and not body.sample_id and not body.image_base64:
+        raise HTTPException(
+            status_code=400,
+            detail="Provide camera_id, sample_id, or image_base64",
+        )
+    try:
+        result = await vision_agent.analyze(
+            session,
+            camera_id=body.camera_id,
+            sample_id=body.sample_id,
+            image_base64=body.image_base64,
+        )
+    except LookupError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"CV service unavailable: {exc}") from exc
+
+    return CvAnalyzeResponse(
+        analysis_id=result.analysis_id,
+        camera_id=result.camera_id,
+        sample_id=result.sample_id,
+        cv_mode=result.cv_mode,
+        detections=[CvDetectionItem(**d) for d in result.detections],
+        hazards=[CvHazardItem(**h) for h in result.hazards],
+        analyzed_at=result.analyzed_at,
+    )
 
 
 @router.post(PATH_RAG_QUERY, response_model=RagQueryResponse)

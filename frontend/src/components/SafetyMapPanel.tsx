@@ -11,12 +11,14 @@ import {
 import { RISK_COLORS, SENSOR_COLORS } from "../constants/riskColors";
 import MapDetailDrawer, { type SelectedFeature } from "./MapDetailDrawer";
 import SafetyMap from "./SafetyMap";
+import CvAnalysisPanel from "./CvAnalysisPanel";
 
 interface LayerVisibility {
   zones: boolean;
   sensors: boolean;
   workers: boolean;
   permits: boolean;
+  cameras: boolean;
 }
 
 interface Props {
@@ -34,6 +36,7 @@ export default function SafetyMapPanel({
     sensors: true,
     workers: true,
     permits: true,
+    cameras: true,
   });
   const [selected, setSelected] = useState<SelectedFeature | null>(null);
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
@@ -139,6 +142,7 @@ export default function SafetyMapPanel({
           visibility={visibility}
           riskColors={layers?.risk_colors ?? RISK_COLORS}
           sensorColors={SENSOR_COLORS}
+          cvHazardColors={layers?.cv_hazard_colors ?? {}}
           onSelect={setSelected}
         />
         <MapDetailDrawer
@@ -148,6 +152,13 @@ export default function SafetyMapPanel({
           onClose={() => setSelected(null)}
         />
       </div>
+
+      {!compact && (
+        <CvAnalysisPanel
+          demoCameraId="66666666-6666-6666-6666-666666666666"
+          onAnalyzed={loadLayers}
+        />
+      )}
     </section>
   );
 }

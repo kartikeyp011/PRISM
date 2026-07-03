@@ -79,6 +79,7 @@ Agents are orchestrated in the backend as Python modules, not separate services.
 | **RiskAgent** | `backend/app/agents/risk.py` | Evaluate compound rules (e.g., hot work + gas spike + confined space) |
 | **AlertAgent** | `backend/app/agents/alerts.py` | Dedupe, prioritize, route alerts, log actions |
 | **ComplianceAgent** | `backend/app/agents/compliance.py` | RAG over SOPs, regulations, and incident reports via remote LLM |
+| **VisionAgent** | `backend/app/agents/vision.py` | CCTV frame analysis — PPE/hazard detection (YOLOv8 or mock) |
 
 ---
 

@@ -42,6 +42,8 @@ def validate_endpoint_paths(contract: dict) -> list[str]:
         "alerts_active": contract_module.PATH_ALERTS_ACTIVE,
         "alerts_ack": contract_module.PATH_ALERTS_ACK,
         "map_layers": contract_module.PATH_MAP_LAYERS,
+        "cv_samples": contract_module.PATH_CV_SAMPLES,
+        "cv_analyze": contract_module.PATH_CV_ANALYZE,
         "rag_query": contract_module.PATH_RAG_QUERY,
     }
     errors: list[str] = []
@@ -96,6 +98,8 @@ def validate_constants(contract: dict) -> list[str]:
         errors.append("EVENT_TYPES constant drift from contract")
     if contract_module.RISK_COLORS != contract["constants"]["risk_colors"]:
         errors.append("RISK_COLORS constant drift from contract")
+    if contract_module.CV_HAZARD_COLORS != contract["constants"]["cv_hazard_colors"]:
+        errors.append("CV_HAZARD_COLORS constant drift from contract")
     return errors
 
 
@@ -114,6 +118,8 @@ def validate_routes_registered() -> list[str]:
         contract_module.PATH_ALERTS_ACTIVE,
         contract_module.PATH_ALERTS_ACK,
         contract_module.PATH_MAP_LAYERS,
+        contract_module.PATH_CV_SAMPLES,
+        contract_module.PATH_CV_ANALYZE,
         contract_module.PATH_RAG_QUERY,
     ]:
         if path not in registered:

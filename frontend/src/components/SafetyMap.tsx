@@ -12,6 +12,7 @@ interface LayerVisibility {
   sensors: boolean;
   workers: boolean;
   permits: boolean;
+  cameras: boolean;
 }
 
 interface Props {
@@ -19,6 +20,7 @@ interface Props {
   visibility: LayerVisibility;
   riskColors: Record<string, string>;
   sensorColors: Record<string, string>;
+  cvHazardColors: Record<string, string>;
   onSelect: (feature: SelectedFeature) => void;
 }
 
@@ -44,6 +46,7 @@ export default function SafetyMap({
   visibility,
   riskColors,
   sensorColors,
+  cvHazardColors,
   onSelect,
 }: Props) {
   const zoneStyle = (feature?: GeoJSON.Feature): PathOptions => {
@@ -120,6 +123,10 @@ export default function SafetyMap({
         renderPoints(layers?.layers.workers, "workers", () => "#a855f7")}
       {visibility.permits &&
         renderPoints(layers?.layers.permits, "permits", () => "#06b6d4")}
+      {visibility.cameras &&
+        renderPoints(layers?.layers.cameras, "cameras", (p) =>
+          String(p.fill_color ?? cvHazardColors[String(p.hazard_status ?? "normal")] ?? "#22c55e")
+        )}
     </MapContainer>
   );
 }

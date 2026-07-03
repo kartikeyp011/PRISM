@@ -8,7 +8,9 @@ from typing import Any
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.contract import RISK_COLORS, THRESHOLDS
+from app.contract import CV_HAZARD_COLORS, RISK_COLORS, THRESHOLDS
+from app.cv.hazards import camera_status
+from app.cv.service import latest_analysis_by_camera
 
 LEL_HIGH = float(THRESHOLDS["lel_high"])
 O2_LOW = float(THRESHOLDS["o2_low"])
@@ -218,19 +220,68 @@ async def _fetch_permit_features(session: AsyncSession) -> list[dict]:
     return features
 
 
+async def _fetch_camera_features(session: AsyncSession) -> list[dict]:
+    latest = await latest_analysis_by_camera(session)
+    result = await session.execute(
+        text(
+            """
+            SELECT
+                c.id::text,
+                c.zone_id::text,
+                c.name,
+                c.status,
+                ST_AsGeoJSON(c.location)::json AS geometry
+            FROM cameras c
+            WHERE c.location IS NOT NULL
+            """
+        )
+    )
+    features = []
+    for row in result.mappings():
+        geometry = _parse_geojson(row["geometry"])
+        if not geometry:
+            continue
+        analysis = latest.get(row["id"])
+        hazards = analysis.hazards if analysis else []
+        hazard_status = camera_status(hazards)
+        features.append(
+            {
+                "type": "Feature",
+                "id": row["id"],
+                "geometry": geometry,
+                "properties": {
+                    "camera_id": row["id"],
+                    "zone_id": row["zone_id"],
+                    "name": row["name"],
+                    "status": row["status"],
+                    "hazard_status": hazard_status,
+                    "fill_color": CV_HAZARD_COLORS.get(hazard_status, CV_HAZARD_COLORS["normal"]),
+                    "hazard_count": len(hazards),
+                    "last_analyzed_at": analysis.analyzed_at.isoformat() if analysis else None,
+                    "last_cv_mode": analysis.cv_mode if analysis else None,
+                    "last_hazards": hazards[:3],
+                },
+            }
+        )
+    return features
+
+
 async def build_map_layers(session: AsyncSession) -> dict[str, Any]:
     zones = await _fetch_zone_features(session)
     sensors = await _fetch_sensor_features(session)
     workers = await _fetch_worker_features(session)
     permits = await _fetch_permit_features(session)
+    cameras = await _fetch_camera_features(session)
 
     return {
         "type": "FeatureCollection",
         "risk_colors": RISK_COLORS,
+        "cv_hazard_colors": CV_HAZARD_COLORS,
         "layers": {
             "zones": {"type": "FeatureCollection", "features": zones},
             "sensors": {"type": "FeatureCollection", "features": sensors},
             "workers": {"type": "FeatureCollection", "features": workers},
             "permits": {"type": "FeatureCollection", "features": permits},
+            "cameras": {"type": "FeatureCollection", "features": cameras},
         },
     }

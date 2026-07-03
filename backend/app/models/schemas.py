@@ -92,7 +92,48 @@ class AlertsActiveResponse(BaseModel):
 class MapLayersResponse(BaseModel):
     type: str = "FeatureCollection"
     risk_colors: dict[str, str] = Field(default_factory=dict)
+    cv_hazard_colors: dict[str, str] = Field(default_factory=dict)
     layers: dict[str, Any]
+
+
+class CvSampleItem(BaseModel):
+    sample_id: str
+    title: str
+    description: str
+    available: bool
+
+
+class CvSamplesResponse(BaseModel):
+    samples: list[CvSampleItem]
+    count: int
+
+
+class CvDetectionItem(BaseModel):
+    label: str
+    confidence: float
+    bbox: list[float]
+
+
+class CvHazardItem(BaseModel):
+    type: str
+    severity: str
+    message: str
+
+
+class CvAnalyzeRequest(BaseModel):
+    camera_id: str | None = None
+    sample_id: str | None = None
+    image_base64: str | None = None
+
+
+class CvAnalyzeResponse(BaseModel):
+    analysis_id: str
+    camera_id: str | None = None
+    sample_id: str | None = None
+    cv_mode: str
+    detections: list[CvDetectionItem]
+    hazards: list[CvHazardItem]
+    analyzed_at: str
 
 
 class RagSource(BaseModel):

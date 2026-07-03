@@ -24,6 +24,14 @@ config_keys:
     description: ChromaDB HTTP endpoint
     required: true
     example: "http://chroma:8000"
+  CV_ENABLED:
+    description: Enable YOLOv8 live inference (false = mock CV mode)
+    required: false
+    default: "false"
+  CV_MODEL:
+    description: Ultralytics model name or path for live CV
+    required: false
+    default: "yolov8n.pt"
   NGROK_AUTH_TOKEN:
     description: ngrok auth token (Kaggle notebook only, not used locally)
     required: false
@@ -77,6 +85,25 @@ constants:
     lel_high: 15.0
     o2_low: 19.5
     alert_dedup_seconds: 300
+
+  cv_hazard_colors:
+    normal: "#22c55e"
+    warning: "#f97316"
+    critical: "#ef4444"
+
+  cv_detection_labels:
+    - person
+    - no_hard_hat
+    - no_safety_vest
+    - welding_torch
+    - fire
+    - smoke
+
+  cv_hazard_types:
+    - PPE_VIOLATION
+    - HOT_WORK_DETECTED
+    - FIRE_SMOKE
+    - UNAUTHORIZED_PERSON
 
 redis_topics:
   events_ingest: prism.events.ingest
@@ -163,11 +190,46 @@ endpoints:
     response:
       type: FeatureCollection
       risk_colors: object
+      cv_hazard_colors: object
       layers:
         zones: object
         sensors: object
         workers: object
         permits: object
+        cameras: object
+
+  cv_samples:
+    method: GET
+    path: /api/v1/cv/samples
+    response:
+      samples: array
+      count: integer
+
+  cv_analyze:
+    method: POST
+    path: /api/v1/cv/analyze
+    request:
+      camera_id: string   # optional
+      sample_id: string   # optional demo sample
+      image_base64: string  # optional uploaded frame
+    response:
+      analysis_id: string
+      camera_id: string   # nullable
+      sample_id: string   # nullable
+      cv_mode: string     # live | mock
+      detections:
+        type: array
+        items:
+          label: string
+          confidence: float
+          bbox: array       # normalized [x1, y1, x2, y2]
+      hazards:
+        type: array
+        items:
+          type: string
+          severity: string
+          message: string
+      analyzed_at: string
 
   rag_query:
     method: POST

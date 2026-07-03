@@ -12,6 +12,8 @@ export const API_PATHS = {
   alertsActive: "/api/v1/alerts/active",
   alertsAck: "/api/v1/alerts/ack",
   mapLayers: "/api/v1/map/layers",
+  cvSamples: "/api/v1/cv/samples",
+  cvAnalyze: "/api/v1/cv/analyze",
   ragQuery: "/api/v1/rag/query",
 } as const;
 
@@ -83,11 +85,13 @@ export interface GeoJsonFeature {
 export interface MapLayersResponse {
   type: string;
   risk_colors: Record<string, string>;
+  cv_hazard_colors: Record<string, string>;
   layers: {
     zones: GeoJsonFeatureCollection;
     sensors: GeoJsonFeatureCollection;
     workers: GeoJsonFeatureCollection;
     permits: GeoJsonFeatureCollection;
+    cameras: GeoJsonFeatureCollection;
   };
 }
 
@@ -182,5 +186,61 @@ export async function fetchRagQuery(
     body: JSON.stringify({ query, session_id: sessionId, top_k: topK }),
   });
   if (!res.ok) throw new Error(`RAG query failed: ${res.status}`);
+  return res.json();
+}
+
+export interface CvSampleItem {
+  sample_id: string;
+  title: string;
+  description: string;
+  available: boolean;
+}
+
+export interface CvSamplesResponse {
+  samples: CvSampleItem[];
+  count: number;
+}
+
+export interface CvDetection {
+  label: string;
+  confidence: number;
+  bbox: number[];
+}
+
+export interface CvHazard {
+  type: string;
+  severity: string;
+  message: string;
+}
+
+export interface CvAnalyzeResponse {
+  analysis_id: string;
+  camera_id: string | null;
+  sample_id: string | null;
+  cv_mode: string;
+  detections: CvDetection[];
+  hazards: CvHazard[];
+  analyzed_at: string;
+}
+
+export async function fetchCvSamples(): Promise<CvSamplesResponse> {
+  const res = await fetch(`${API_BASE}${API_PATHS.cvSamples}`);
+  if (!res.ok) throw new Error(`CV samples failed: ${res.status}`);
+  return res.json();
+}
+
+export async function analyzeCvSample(
+  sampleId: string,
+  cameraId?: string
+): Promise<CvAnalyzeResponse> {
+  const res = await fetch(`${API_BASE}${API_PATHS.cvAnalyze}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      sample_id: sampleId,
+      camera_id: cameraId,
+    }),
+  });
+  if (!res.ok) throw new Error(`CV analyze failed: ${res.status}`);
   return res.json();
 }

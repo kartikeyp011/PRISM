@@ -49,6 +49,16 @@ Knowledge docs auto-index into ChromaDB on backend startup. Re-index manually:
 docker compose exec backend python -m app.rag.index
 ```
 
+### CCTV Analysis (Feature 5 — optional)
+
+Open **Safety Map** → **CCTV Analysis** panel:
+
+1. Select a demo sample (e.g. **Missing PPE**)
+2. Click **Analyze frame**
+3. Camera marker updates on the map (orange = warning, red = critical)
+
+Mock CV mode is default (`CV_ENABLED=false`). Set `CV_ENABLED=true` for live YOLOv8 inference.
+
 ### Optional — Live LLM via Kaggle
 
 See [`kaggle/README.md`](kaggle/README.md), then set `LLM_BASE_URL` in `.env`.
@@ -67,14 +77,15 @@ Single source of truth: [`backend/api_contract.yaml`](backend/api_contract.yaml)
 
 ## Status
 
-**Feature 4 complete** — RAG compliance and incident intelligence.
+**Feature 5 complete** — optional CCTV computer vision pipeline.
 
 | Component | Status |
 |---|---|
 | Simulator + ingestion + TimescaleDB | Done |
 | Risk engine + alerts + WebSocket | Done |
 | Geospatial map + dashboard UI | Done |
-| **RAG + Incident Intelligence** | **Done** |
+| RAG + Incident Intelligence | Done |
+| **CCTV CV analysis + map overlay** | **Done** |
 
 ## Project Docs
 
